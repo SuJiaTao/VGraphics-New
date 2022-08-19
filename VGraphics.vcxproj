@@ -23,11 +23,12 @@
     <ClInclude Include="vgfxcore.h" />
     <ClInclude Include="vgfxdefs.h" />
     <ClInclude Include="vgfxrenderthread.h" />
+    <ClInclude Include="vgfxshaders.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vgfxcore.c" />
     <ClCompile Include="vgfxrenderthread.c" />
-    <ClCompile Include="vwindows.c" />
+    <ClCompile Include="vgfxshaders.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
