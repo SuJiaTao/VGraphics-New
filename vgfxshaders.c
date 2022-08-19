@@ -54,14 +54,15 @@ VGFXAPI GLuint vGFXCompileShader(GLenum shaderType, PCHAR source)
 	/* check if shader compiled properly */
 	GLint compileStatus;
 	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &compileStatus);
-	if (compileStatus != TRUE)
+	if (compileStatus == FALSE)
 	{
 		vLogError(__func__, "Shader failed to compile.");
-		vCHAR errorBuff[BUFF_LARGE];
-		glGetShaderInfoLog(shaderID, sizeof(errorBuff), NULL, errorBuff);
-		vLogErrorFormatted(__func__, "Shader compiler info: \n%s", errorBuff);
+		GLsizei writeLength; /* unused */
+		GLchar  errorBuff[BUFF_LARGE];
+		glGetShaderInfoLog(shaderID, sizeof(errorBuff), &writeLength, errorBuff);
+		vLogError(__func__, errorBuff);
 		
-		return NULL;
+		return ZERO;
 	}
 
 	return shaderID;
@@ -88,7 +89,7 @@ VGFXAPI GLuint vGFXCreateShaderProgram(GLuint vertex, GLuint frag)
 		vCHAR errorBuffer[BUFF_LARGE];
 		glGetProgramInfoLog(shaderProgramID, sizeof(errorBuffer), NULL, errorBuffer);
 		vLogErrorFormatted(__func__, "Shader linking info: \n%s", errorBuffer);
-		return NULL;
+		return ZERO;
 	}
 
 	vLogInfo(__func__, "Shader program created.");

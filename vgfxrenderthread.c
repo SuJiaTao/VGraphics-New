@@ -7,13 +7,58 @@
 #define GLEW_STATIC
 #include "glew.h"
 #include "vgfxrenderthread.h"
+#include "vgfxshaders.h"
 
 
 /* ========== HELPER							==========	*/
 static __forceinline vhDestroyWindow(HWND winHndl)
 {
-	ReleaseDC(winHndl, _vgfx.deviceContext);
+	/* free openGL objects */
+	glDeleteFramebuffers(1, &_vgfx.framebuffer);
+	glDeleteRenderbuffers(1, &_vgfx.framebufferDepth);
+	glDeleteTextures(1, &_vgfx.framebufferTexture);
+
+	/* free resources */
 	wglDeleteContext(_vgfx.renderContext);
+	ReleaseDC(winHndl, _vgfx.deviceContext);
+}
+
+static __forceinline void vhInitializeShaderProgram(void)
+{
+	vLogInfo(__func__, "Initializing shaders.");
+	vBOOL loadResult;
+	GLuint vertexShader, fragmentShader;
+
+	/* allocate source buffer */
+	vPCHAR shaderSourceBuff = vAllocZeroed(BUFF_MASSIVE);
+
+	/* load and compile vertex shader */
+	loadResult = vGFXLoadShader(shaderSourceBuff, BUFF_MASSIVE,
+		VGFX_SHADER_VERTEX_NAME);
+	if (loadResult == FALSE) { vCoreFatalError(__func__, "Vertex shader could not be loaded."); }
+	vertexShader = vGFXCompileShader(GL_VERTEX_SHADER, shaderSourceBuff);
+	if (vertexShader == ZERO) { vCoreFatalError(__func__, "Vertex shader could not be compiled."); }
+
+	vLogInfo(__func__, "Vertex shader loaded and compiled sucessfully.");
+	vZeroMemory(shaderSourceBuff, BUFF_MASSIVE);
+
+	/* load and compile fragment shader */
+	loadResult = vGFXLoadShader(shaderSourceBuff, BUFF_MASSIVE,
+		VGFX_SHADER_FRAGMENT_NAME);
+	if (loadResult == FALSE) { vCoreFatalError(__func__, "Fragment shader could not be loaded."); }
+	fragmentShader = vGFXCompileShader(GL_FRAGMENT_SHADER, shaderSourceBuff);
+	if (fragmentShader == ZERO) { vCoreFatalError(__func__, "Fragment shader could not be compiled."); }
+
+	/* free shader source buffer */
+	vFree(shaderSourceBuff);
+
+	/* create shader program and use */
+	_vgfx.shaderProgram = vGFXCreateShaderProgram(vertexShader, fragmentShader);
+	if (_vgfx.shaderProgram == ZERO) { vCoreFatalError(__func__, "Could not create shader program."); }
+	glUseProgram(_vgfx.shaderProgram);
+
+	vLogInfo(__func__, "Shaders initialized sucessfully.");
+	vDumpEntryBuffer();
 }
 
 static LRESULT CALLBACK vGFXWindowProc(HWND winHndl, UINT message, 
@@ -193,6 +238,9 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 
 	/* initialize framebuffer */
 	vhInitializeFramebuffer();
+
+	/* load, compile and use shaders */
+	vhInitializeShaderProgram();
 
 	/* render time related variables */
 	ULONGLONG currentRenderTimeMsec = 0;

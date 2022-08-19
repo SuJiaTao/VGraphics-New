@@ -27,14 +27,20 @@
 #define VGFX_TERMINATE_TRYTIME_MSEC	0x400
 #define VGFX_TERMINATE_TRIES_MAX	0xA
 
-#define VGFX_WINDOW_CLASS_NAME		"VGFX Render Window"
-
 #define VGFX_ASPECT_RATIO			1.5f
 #define VGFX_RESOLUTION_HEIGHT		0x180
 #define VGFX_RESOLUTION_WIDTH		VGFX_RESOLUTION_HEIGHT * VGFX_ASPECT_RATIO
 
 #define VGFX_FRAMERATE				25
 #define VGFX_RENDER_SLEEP_MSEC		1000 / VGFX_FRAMERATE
+
+
+/* ========== STRINGS							==========	*/
+#define VGFX_WINDOW_CLASS_NAME		"VGFX Render Window"
+
+#define VGFX_SHADER_VERTEX_NAME		"vgfx_vert.txt"
+#define VGFX_SHADER_FRAGMENT_NAME	"vgfx_frag.txt"
+
 
 /* ========== TYPE DEFS							==========	*/
 
@@ -107,6 +113,8 @@ typedef struct _vGFXInternals
 	vHNDL  renderThreadLock;	/* render thread sync object			*/
 
 	vUI64 renderFrameCount;	/* increments with every frame rendered		*/
+
+	GLuint shaderProgram;
 
 	GLuint framebuffer;				/* framebuffer to render to			*/
 	GLuint framebufferTexture;		/* framebuffer texture object		*/
