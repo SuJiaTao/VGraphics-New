@@ -237,6 +237,7 @@ static __forceinline void vhInitializeRenderWindow(void)
 static __forceinline vhRenderFrame(void)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
+	glClearColor(VGFX_FAILEDRENDER_COLOR);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	glMatrixMode(GL_PROJECTION);
@@ -273,6 +274,13 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	ULONGLONG lastRenderTimeMsec    = 0;
 	ULONGLONG nextRenderTimeMsec    = 0;
 
+	/* create frame object */
+	_vgfx.frameObject = vGFXCreateRenderObject();
+	_vgfx.frameObject->render = FALSE; /* make invisible */
+	_vgfx.frameObject->texture.glHandle = _vgfx.framebufferTexture;
+	_vgfx.frameObject->rectangle.width  = VGFX_ASPECT_RATIO;
+	_vgfx.frameObject->rectangle.height = 1.0f;
+
 	vLogInfo(__func__, "VGFX Starting render loop.");
 	vDumpEntryBuffer(); /* dump in case of crash */
 
@@ -306,6 +314,7 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 
 		/* switch to custom framebuffer, clear and setup projection */
 		glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebufferTexture);
+		glClearColor(VGFX_CLEAR_COLOR);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		glMatrixMode(GL_PROJECTION);

@@ -34,6 +34,9 @@
 #define VGFX_FRAMERATE				25
 #define VGFX_RENDER_SLEEP_MSEC		1000 / VGFX_FRAMERATE
 
+#define VGFX_CLEAR_COLOR			0.298f, 0.349f, 0.439f, 1.000f
+#define VGFX_FAILEDRENDER_COLOR		1.0f, 0.0f, 1.0f, 1.0f
+
 
 /* ========== STRINGS							==========	*/
 #define VGFX_WINDOW_CLASS_NAME		"VGFX Render Window"
