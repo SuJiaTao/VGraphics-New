@@ -88,10 +88,42 @@ VGFXAPI GLuint vGFXCreateShaderProgram(GLuint vertex, GLuint frag)
 		vLogError(__func__, "Shader program failed to link.");
 		vCHAR errorBuffer[BUFF_LARGE];
 		glGetProgramInfoLog(shaderProgramID, sizeof(errorBuffer), NULL, errorBuffer);
-		vLogErrorFormatted(__func__, "Shader linking info: \n%s", errorBuffer);
+		vLogError(__func__, errorBuffer);
 		return ZERO;
 	}
 
 	vLogInfo(__func__, "Shader program created.");
 	return shaderProgramID;
+}
+
+
+/* ========== SHADER VERTEX ATTRIBUTE SETUP		==========	*/
+VGFXAPI void vGFXSetupShaderVertexAttributes(void)
+{
+	/* generate VAO to store vertex attribute descriptors */
+	glGenVertexArrays(1, &_vgfx.vertexAttributes);
+	glBindVertexArray(_vgfx.vertexAttributes);
+
+	if (_vgfx.vertexAttributes == ZERO)
+	{
+		vLogError(__func__, "Could not create vertex array object.");
+		vCoreFatalError(__func__, "Failed to create vertex array object.");
+	}
+
+	/* generate base rect for render objects (normalized square) */
+	float baseRect[4][2] = { { -1, -1 }, { -1, 1 }, { 1, 1 }, { 1, -1} };
+
+	glGenBuffers(1, &_vgfx.renderObjectBaseRect);
+	glBindBuffer(GL_ARRAY_BUFFER, _vgfx.renderObjectBaseRect);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(baseRect), baseRect, GL_STATIC_DRAW);
+
+	if (_vgfx.renderObjectBaseRect == ZERO)
+	{
+		vLogError(__func__, "Could not create vertex buffer object.");
+		vCoreFatalError(__func__, "Failed to create vertex buffer object.");
+	}
+
+	/* setup vertex attributes */
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 }

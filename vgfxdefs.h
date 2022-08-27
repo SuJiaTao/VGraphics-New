@@ -28,7 +28,7 @@
 #define VGFX_TERMINATE_TRIES_MAX	0xA
 
 #define VGFX_ASPECT_RATIO			1.5f
-#define VGFX_RESOLUTION_HEIGHT		0x180
+#define VGFX_RESOLUTION_HEIGHT		0x80
 #define VGFX_RESOLUTION_WIDTH		VGFX_RESOLUTION_HEIGHT * VGFX_ASPECT_RATIO
 
 #define VGFX_FRAMERATE				25
@@ -97,7 +97,7 @@ typedef struct vRenderObject
 	vRect	 rectangle;		/* object bounding rectangle				*/
 
 	vTransform2 transform;	/* object's spacial info					*/
-} vRenderObject, vPRenderObject;
+} vRenderObject, *vPRenderObject;
 
 typedef struct _vGFXInternals
 {
@@ -107,21 +107,28 @@ typedef struct _vGFXInternals
 
 	HDC deviceContext;		/* client's device context					*/
 
-	HWND   renderWindow;
+	HWND renderWindow;
+	LONG renderClientWidth;
+	LONG renderClientHeight;
+
 	HGLRC  renderContext;	/* openGL render context object				*/
 	HANDLE renderThread;	/* handle to render thread					*/
 	vHNDL  renderThreadLock;	/* render thread sync object			*/
 
 	vUI64 renderFrameCount;	/* increments with every frame rendered		*/
 
+	vPRenderObject frameObject;
+
 	GLuint shaderProgram;
+	GLuint vertexAttributes;		/* VAO object */
 
 	GLuint framebuffer;				/* framebuffer to render to			*/
 	GLuint framebufferTexture;		/* framebuffer texture object		*/
 	GLuint framebufferDepth;		/* framebuffer depth componenet		*/
 	vTransform2 cameraPosition;		/* camera offset					*/
 
-	vHNDL renderObjectBuffer;	/* objects to render					*/
+	vHNDL  renderObjectBuffer;		/* objects to render				*/
+	GLuint renderObjectBaseRect;	/* base rect and UV					*/
 
 } _vGFXInternals, *_vPGFXInternals;
 

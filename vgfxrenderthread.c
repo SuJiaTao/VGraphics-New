@@ -6,8 +6,10 @@
 /* ========== INCLUDES							==========	*/
 #define GLEW_STATIC
 #include "glew.h"
+#include <stdio.h>
 #include "vgfxrenderthread.h"
 #include "vgfxshaders.h"
+#include "vgfxdrawobject.h"
 
 
 /* ========== HELPER							==========	*/
@@ -30,10 +32,10 @@ static __forceinline void vhInitializeShaderProgram(void)
 	GLuint vertexShader, fragmentShader;
 
 	/* allocate source buffer */
-	vPCHAR shaderSourceBuff = vAllocZeroed(BUFF_MASSIVE);
+	vPCHAR shaderSourceBuff = vAllocZeroed(4096);
 
 	/* load and compile vertex shader */
-	loadResult = vGFXLoadShader(shaderSourceBuff, BUFF_MASSIVE,
+	loadResult = vGFXLoadShader(shaderSourceBuff, 4096,
 		VGFX_SHADER_VERTEX_NAME);
 	if (loadResult == FALSE) { vCoreFatalError(__func__, "Vertex shader could not be loaded."); }
 	vertexShader = vGFXCompileShader(GL_VERTEX_SHADER, shaderSourceBuff);
@@ -131,12 +133,12 @@ static __forceinline void vhInitializeFramebuffer(void)
 	/* generate openGL objects  and bind */
 	vLogInfo(__func__, "Generating framebuffer render objects.");
 	glGenFramebuffers(1, &_vgfx.framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebuffer);
 	glGenTextures(1, &_vgfx.framebufferTexture);
+	glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebuffer);
 	glBindTexture(GL_TEXTURE_2D, _vgfx.framebufferTexture);
 
 	/* set texture size */
-	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGB4_EXT,
+	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGB,
 		VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT, ZERO,
 		GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
@@ -160,6 +162,13 @@ static __forceinline void vhInitializeFramebuffer(void)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
 		_vgfx.framebufferTexture, NULL);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	GLenum framebufferCheck = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (framebufferCheck != GL_FRAMEBUFFER_COMPLETE)
+	{
+		vLogErrorFormatted(__func__, "Framebuffer incomplete! Framebuffer status: %d.", framebufferCheck);
+		vCoreFatalError(__func__, "Framebuffer incomplete.");
+	}
 
 	vLogInfo(__func__, "Framebuffer initialized.");
 }
@@ -225,6 +234,20 @@ static __forceinline void vhInitializeRenderWindow(void)
 
 }
 
+static __forceinline vhRenderFrame(void)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
+	glViewport(0, 0, _vgfx.renderClientWidth, _vgfx.renderClientHeight);
+	
+	vGFXDrawRenderObject(_vgfx.frameObject);
+}
+
 /* ========== RENDER THREAD ENTRY POINT			==========	*/
 VGFXAPI void vGFXRenderThreadProcess(void* input)
 {
@@ -242,6 +265,9 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	/* load, compile and use shaders */
 	vhInitializeShaderProgram();
 
+	/* setup shader vertex arrays */
+	vGFXSetupShaderVertexAttributes();
+
 	/* render time related variables */
 	ULONGLONG currentRenderTimeMsec = 0;
 	ULONGLONG lastRenderTimeMsec    = 0;
@@ -253,6 +279,9 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	/* render loop */
 	while (_vgfx.killThreadSignal == FALSE)
 	{
+		/* update window */
+		vhUpdateWindow();
+
 		/* ensure render sleep time has passed */
 		currentRenderTimeMsec = GetTickCount64();
 		nextRenderTimeMsec = lastRenderTimeMsec + VGFX_RENDER_SLEEP_MSEC;
@@ -264,18 +293,38 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 
 		/* SYNC */ vLock(_vgfx.renderThreadLock);
 
-		/* clear buffer */
-		__glewBindFramebuffer(GL_FRAMEBUFFER, ZERO); /* bind to default framebuffer */
-		glClear(GL_COLOR_BUFFER_BIT);
+		/* ensure window aspect ratio is fixed and set window height and width vars */
+		RECT windowRect, clientRect;
+		GetWindowRect(_vgfx.renderWindow, &windowRect);
+		LONG windowWidth = windowRect.right - windowRect.left;
+		SetWindowPos(_vgfx.renderWindow, NO_WINDOW, 0, 0,
+			windowWidth, windowWidth / VGFX_ASPECT_RATIO, SWP_NOMOVE);
+
+		GetClientRect(_vgfx.renderWindow, &clientRect);
+		_vgfx.renderClientWidth  = clientRect.right - clientRect.left;
+		_vgfx.renderClientHeight = clientRect.bottom - clientRect.top;
+
+		/* switch to custom framebuffer, clear and setup projection */
+		glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebufferTexture);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+
+		glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
+		glViewport(0, 0, VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT);
+
+		/* draw all objects */
+		vGFXDrawRenderObjects();
+
+		/* switch to default framebuffer, and render frame */
+		vhRenderFrame();
 
 		/* swap buffers */
 		SwapBuffers(_vgfx.deviceContext);
 
 		/* increment render count */
 		_vgfx.renderFrameCount++;
-
-		/* update window */
-		vhUpdateWindow();
 
 		/* UNSYNC */ vUnlock(_vgfx.renderThreadLock);
 	}

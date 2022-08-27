@@ -23,4 +23,8 @@ VGFXAPI GLuint vGFXCompileShader(GLenum shaderType, PCHAR source);
 VGFXAPI GLuint vGFXCreateShaderProgram(GLuint vertex, GLuint frag);
 
 
+/* ========== SHADER VERTEX ATTRIBUTE SETUP		==========	*/
+VGFXAPI void vGFXSetupShaderVertexAttributes(void);
+
+
 #endif

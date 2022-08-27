@@ -7,8 +7,9 @@
 #define _VGFX_INCLUDE_
 
 /* ========== INCLUDES							==========	*/
-#include "vcore.h"			/* all core functions and defs	*/
-#include "vgfxdefs.h"		/* all gfx related defs			*/
-#include "vgfxcore.h"		/* core gfx functionality		*/
+#include "vcore.h"				/* all core functions and defs	*/
+#include "vgfxdefs.h"			/* all gfx related defs			*/
+#include "vgfxcore.h"			/* core gfx functionality		*/
+#include "vgfxobjects.h"		/* gfx object manipulation		*/
 
 #endif 
