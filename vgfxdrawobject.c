@@ -45,10 +45,10 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 	glUniform4f(1, object->tint.R, object->tint.G, object->tint.B, object->tint.A);
 	glUniformMatrix4fv(2, 1, GL_FALSE, projectionMatrix);
 	glUniformMatrix4fv(3, 1, GL_FALSE, modelMatrix);
-	glBindTexture(GL_TEXTURE_2D, object->texture.glHandle);
 
 	glEnable(GL_TEXTURE_2D);
 
+	glBindTexture(GL_TEXTURE_2D, object->texture.glHandle);
 	glDrawArrays(GL_QUADS, 0, 4);
 
 	glDisable(GL_TEXTURE_2D);

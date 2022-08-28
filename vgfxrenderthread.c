@@ -234,6 +234,35 @@ static __forceinline void vhInitializeRenderWindow(void)
 
 }
 
+static __forceinline vhExecuteJobs(void)
+{
+	for (vUI32 jobCount = 0; jobCount < RENDERJOBS_PER_CYCLE; jobCount++)
+	{
+		/* LOCK BUFFER */ vLock(_vgfx.jobBuffer.jobBufferLock);
+
+		/* if all jobs are complete, unlock and return */
+		if (_vgfx.jobBuffer.jobsLeftToExecute == 0)
+		{
+			vUnlock(_vgfx.jobBuffer.jobBufferLock);
+			return;
+		}
+
+		/* get job to execute */
+		_vgfx.jobBuffer.jobStartIndex %= RENDERJOBS_MAX;
+		vPRenderJob toExecute = _vgfx.jobBuffer.jobs + _vgfx.jobBuffer.jobStartIndex;
+
+		/* execute job (if applicable) and the zero job memory */
+		if (toExecute->job != NULL) toExecute->job(toExecute->data);
+		vZeroMemory(toExecute, sizeof(vRenderJob));
+
+		/* increment start index and decrement jobs left */
+		_vgfx.jobBuffer.jobStartIndex++;
+		_vgfx.jobBuffer.jobsLeftToExecute--;
+
+		/* UNLOCK BUFFER*/ vUnlock(_vgfx.jobBuffer.jobBufferLock);
+	}
+}
+
 static __forceinline vhRenderFrame(void)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
@@ -290,6 +319,9 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 		/* update window */
 		vhUpdateWindow();
 
+		/* execute jobs */
+		vhExecuteJobs();
+
 		/* ensure render sleep time has passed */
 		currentRenderTimeMsec = GetTickCount64();
 		nextRenderTimeMsec = lastRenderTimeMsec + VGFX_RENDER_SLEEP_MSEC;
@@ -309,11 +341,11 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 			windowWidth, windowWidth / VGFX_ASPECT_RATIO, SWP_NOMOVE);
 
 		GetClientRect(_vgfx.renderWindow, &clientRect);
-		_vgfx.renderClientWidth  = clientRect.right - clientRect.left;
+		_vgfx.renderClientWidth  = clientRect.right  - clientRect.left;
 		_vgfx.renderClientHeight = clientRect.bottom - clientRect.top;
 
 		/* switch to custom framebuffer, clear and setup projection */
-		glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebufferTexture);
+		glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebuffer);
 		glClearColor(VGFX_CLEAR_COLOR);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 

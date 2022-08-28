@@ -10,8 +10,14 @@
 #include "vgfx.h"
 
 
-/* ========== CREATION AND DESTRUCTION			==========	*/
+/* ========== RENDERABLE THINGS					==========	*/
 VGFXAPI vPRenderObject vGFXCreateRenderObject(void);
 VGFXAPI void vGFXDestroyRenderObject(vPRenderObject object);
+VGFXAPI void vGFXCreateTexture(vPTexture outTexture, vUI32 width, vUI32 height, 
+	vPBYTE byteData);
+
+
+/* ========== RENDER JOBS						==========	*/
+VGFXAPI void vGFXCreateJob(vGFXPFRenderJob job, vPTR persistentData);
 
 #endif

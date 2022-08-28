@@ -27,6 +27,7 @@ VGFXAPI vBOOL vGFXInitialize(void)
 	_vgfx.renderThreadLock   = vCreateLock();
 	_vgfx.renderObjectBuffer = vCreateBuffer("VGFX Render Object Buffer",
 		sizeof(vRenderObject), RENDER_OBJECTS_MAX);
+	_vgfx.jobBuffer.jobBufferLock = vCreateLock();
 
 	vLogInfo(__func__, "Starting VGFX render thread.");
 
@@ -71,6 +72,7 @@ VGFXAPI vBOOL vGFXTerminate(void)
 	/* free vcore resources and zero memory */
 	vDestroyLock(_vgfx.renderThreadLock);
 	vDestroyBuffer(_vgfx.renderObjectBuffer);
+	vDestroyLock(_vgfx.jobBuffer.jobBufferLock);
 	vZeroMemory(&_vgfx, sizeof(_vgfx));
 
 	vLogInfo(__func__, "VGFX Terminated.");
@@ -82,6 +84,26 @@ VGFXAPI vBOOL vGFXTerminate(void)
 VGFXAPI vBOOL vGFXIsInitialized(void)
 {
 	return _vgfx.initialized;
+}
+
+
+/* ========== WINDOW FUNCTIONS					==========	*/
+VGFXAPI void vGFXWindowSetTitle(vPCHAR title)
+{
+	SetWindowTextA(_vgfx.renderWindow, title);
+}
+
+VGFXAPI void vGFXWindowSetSize(LONG width, LONG height)
+{
+	SetWindowPos(_vgfx.renderWindow, NO_WINDOW, 0, 0, width, height, SWP_NOMOVE);
+}
+
+VGFXAPI void vGFXWindowGetSize(LPLONG pWidth, LPLONG pHeight)
+{
+	RECT wRect;
+	GetWindowRect(_vgfx.renderWindow, &wRect);
+	*pWidth  = wRect.right  - wRect.left;
+	*pHeight = wRect.bottom - wRect.top;
 }
 
 

@@ -22,6 +22,13 @@ VGFXAPI vBOOL vGFXIsInitialized(void);
 VGFXAPI void vGFXLock(void);
 VGFXAPI void vGFXUnlock(void);
 
+
+/* ========== WINDOW FUNCTIONS					==========	*/
+VGFXAPI void vGFXWindowSetTitle(vPCHAR title);
+VGFXAPI void vGFXWindowSetSize(LONG width, LONG height);
+VGFXAPI void vGFXWindowGetSize(LPLONG pWidth, LPLONG pHeight);
+
+
 /* ========== INFORMATION POLLING				==========	*/
 VGFXAPI vBOOL vGFXIsWindowClosed(void);
 VGFXAPI _vPGFXInternals vGFXGetLibraryPointer(void);
