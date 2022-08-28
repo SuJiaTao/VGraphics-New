@@ -29,6 +29,15 @@ VGFXAPI void vGFXWindowSetSize(LONG width, LONG height);
 VGFXAPI void vGFXWindowGetSize(LPLONG pWidth, LPLONG pHeight);
 
 
+/* ========== CAMERA FUNCTIONS					==========	*/
+VGFXAPI void vGFXCameraResetAll(void);
+VGFXAPI void vGFXCameraSetPos(v2V position);
+VGFXAPI void vGFXCameraSetRotation(float rotation);
+VGFXAPI void vGFXCameraSetScale(float scale);
+VGFXAPI void vGFXCameraSetTransform(vPT2 pTransform);
+VGFXAPI void vGFXCameraGetTransform(vPT2 oTransform);
+
+
 /* ========== INFORMATION POLLING				==========	*/
 VGFXAPI vBOOL vGFXIsWindowClosed(void);
 VGFXAPI _vPGFXInternals vGFXGetLibraryPointer(void);

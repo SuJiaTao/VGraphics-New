@@ -355,6 +355,11 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 		glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
 		glViewport(0, 0, VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT);
 
+		/* perform camera transform */
+		glTranslatef(-_vgfx.cameraTransform.position.x, -_vgfx.cameraTransform.position.y, 0.0f);
+		glRotatef(_vgfx.cameraTransform.rotation, 0, 0, 1.0f);
+		glScalef(_vgfx.cameraTransform.scale, _vgfx.cameraTransform.scale, 1.0f);
+
 		/* draw all objects */
 		vGFXDrawRenderObjects();
 

@@ -150,7 +150,7 @@ typedef struct _vGFXInternals
 	GLuint framebuffer;				/* framebuffer to render to			*/
 	GLuint framebufferTexture;		/* framebuffer texture object		*/
 	GLuint framebufferDepth;		/* framebuffer depth componenet		*/
-	vTransform2 cameraPosition;		/* camera offset					*/
+	vTransform2 cameraTransform;	/* camera transform					*/
 
 	vHNDL  renderObjectBuffer;		/* objects to render				*/
 	GLuint renderObjectBaseRect;	/* base rect and UV					*/

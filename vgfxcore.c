@@ -28,6 +28,7 @@ VGFXAPI vBOOL vGFXInitialize(void)
 	_vgfx.renderObjectBuffer = vCreateBuffer("VGFX Render Object Buffer",
 		sizeof(vRenderObject), RENDER_OBJECTS_MAX);
 	_vgfx.jobBuffer.jobBufferLock = vCreateLock();
+	vGFXCameraResetAll();
 
 	vLogInfo(__func__, "Starting VGFX render thread.");
 
@@ -116,6 +117,41 @@ VGFXAPI void vGFXLock(void)
 VGFXAPI void vGFXUnlock(void)
 {
 	vUnlock(_vgfx.renderThreadLock);
+}
+
+
+/* ========== CAMERA FUNCTIONS					==========	*/
+VGFXAPI void vGFXCameraResetAll(void)
+{
+	_vgfx.cameraTransform.position.x = 0;
+	_vgfx.cameraTransform.position.y = 0;
+	_vgfx.cameraTransform.rotation = 0;
+	_vgfx.cameraTransform.scale = 1;
+}
+
+VGFXAPI void vGFXCameraSetPos(v2V position)
+{
+	_vgfx.cameraTransform.position = position;
+}
+
+VGFXAPI void vGFXCameraSetRotation(float rotation)
+{
+	_vgfx.cameraTransform.rotation = rotation;
+}
+
+VGFXAPI void vGFXCameraSetScale(float scale)
+{
+	_vgfx.cameraTransform.scale = scale;
+}
+
+VGFXAPI void vGFXCameraSetTransform(vPT2 pTransform)
+{
+	vMemCopy(&_vgfx.cameraTransform, pTransform, sizeof(vT2));
+}
+
+VGFXAPI void vGFXCameraGetTransform(vPT2 oTransform)
+{
+	*oTransform = _vgfx.cameraTransform;
 }
 
 
