@@ -161,7 +161,7 @@ VGFXAPI vBOOL vGFXIsWindowClosed(void)
 	return _vgfx.windowClosed;
 }
 
-VGFXAPI _vPGFXInternals vGFXGetLibraryPointer(void)
+VGFXAPI _vPGFXInternals vGFXGetInternals(void)
 {
 	return &_vgfx;
 }

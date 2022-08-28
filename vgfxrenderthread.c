@@ -316,12 +316,6 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	/* render loop */
 	while (_vgfx.killThreadSignal == FALSE)
 	{
-		/* update window */
-		vhUpdateWindow();
-
-		/* execute jobs */
-		vhExecuteJobs();
-
 		/* ensure render sleep time has passed */
 		currentRenderTimeMsec = GetTickCount64();
 		nextRenderTimeMsec = lastRenderTimeMsec + VGFX_RENDER_SLEEP_MSEC;
@@ -332,6 +326,12 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 		}
 
 		/* SYNC */ vLock(_vgfx.renderThreadLock);
+
+		/* update window */
+		vhUpdateWindow();
+
+		/* execute jobs */
+		vhExecuteJobs();
 
 		/* ensure window aspect ratio is fixed and set window height and width vars */
 		RECT windowRect, clientRect;
