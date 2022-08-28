@@ -18,12 +18,16 @@ VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s);
 
 /* ========== RENDERABLE THINGS					==========	*/
 VGFXAPI vPRenderObject vGFXCreateRenderObject(void);
+VGFXAPI vPRenderObject vGFXCreateRenderObjectR(vRect rect);
+VGFXAPI vPRenderObject vGFXCreateRenderObjectT(vRect rect, vPT2 transform);
+VGFXAPI vPRenderObject vGFXCreateRenderObjectEx(vRect rect, vPT2 transform, vPTexture texture);
 VGFXAPI void vGFXDestroyRenderObject(vPRenderObject object);
 VGFXAPI void vGFXCreateTexture(vPTexture outTexture, vUI32 width, vUI32 height, 
 	vPBYTE byteData);
 VGFXAPI void vGFXDestroyTexture(vPTexture inTexture);
 
+
 /* ========== RENDER JOBS						==========	*/
-VGFXAPI void vGFXCreateJob(vGFXPFRenderJob job, vPTR persistentData);
+VGFXAPI void vGFXCreateRenderJob(vGFXPFRenderJob job, vPTR persistentData);
 
 #endif

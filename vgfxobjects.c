@@ -40,6 +40,8 @@ VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s)
 /* ========== RENDERABLE THINGS					==========	*/
 VGFXAPI vPRenderObject vGFXCreateRenderObject(void)
 {
+	vhEnsureContext(__func__);
+
 	vPRenderObject rObj = vBufferAdd(_vgfx.renderObjectBuffer);
 	rObj->render = TRUE;
 	rObj->rectangle.width  = 1.0f;
@@ -52,8 +54,34 @@ VGFXAPI vPRenderObject vGFXCreateRenderObject(void)
 	return rObj;
 }
 
+VGFXAPI vPRenderObject vGFXCreateRenderObjectR(vRect rect)
+{
+	vPRenderObject rObj = vGFXCreateRenderObject();
+	rObj->rectangle = rect;
+	return rObj;
+}
+
+VGFXAPI vPRenderObject vGFXCreateRenderObjectT(vRect rect, vPT2 transform)
+{
+	vPRenderObject rObj = vGFXCreateRenderObjectR(rect);
+	vMemCopy(&rObj->transform, transform, sizeof(vT2));
+	return rObj;
+}
+
+VGFXAPI vPRenderObject vGFXCreateRenderObjectEx(vRect rect, vPT2 transform, vPTexture texture)
+{
+	vPRenderObject rObj = vGFXCreateRenderObjectT(rect, transform);
+	vMemCopy(&rObj->texture, texture, sizeof(vTexture));
+	return rObj;
+}
+
 VGFXAPI void vGFXDestroyRenderObject(vPRenderObject object)
 {
+	vhEnsureContext(__func__);
+
+	/* free associated gl objects */
+	vGFXDestroyTexture(&object->texture);
+
 	vBufferRemove(_vgfx.renderObjectBuffer, object);
 }
 
@@ -81,7 +109,7 @@ VGFXAPI void vGFXDestroyTexture(vPTexture inTexture)
 
 
 /* ========== RENDER JOBS						==========	*/
-VGFXAPI void vGFXCreateJob(vGFXPFRenderJob job, vPTR persistentData)
+VGFXAPI void vGFXCreateRenderJob(vGFXPFRenderJob job, vPTR persistentData)
 {
 	/* wait for there to be free job spots */
 	while (TRUE)
@@ -89,7 +117,7 @@ VGFXAPI void vGFXCreateJob(vGFXPFRenderJob job, vPTR persistentData)
 		/* LOCK BUFFER */ vLock(_vgfx.jobBuffer.jobBufferLock);
 
 		/* on free spot, break */
-		if (_vgfx.jobBuffer.jobsLeftToExecute < RENDERJOBS_MAX) break;
+		if (_vgfx.jobBuffer.jobsLeftToExecute < RENDERJOBS_PER_CYCLE) break;
 
 		/* else, unlock and sleep until it's time to check again */
 		/* UNLOCK BUFFER */ vUnlock(_vgfx.jobBuffer.jobBufferLock);
@@ -98,7 +126,7 @@ VGFXAPI void vGFXCreateJob(vGFXPFRenderJob job, vPTR persistentData)
 	
 	/* get next index in circular array */
 	vUI64 nextJobIndex = _vgfx.jobBuffer.jobStartIndex + (vUI64)_vgfx.jobBuffer.jobsLeftToExecute;
-	vPRenderJob pJob = _vgfx.jobBuffer.jobs + (nextJobIndex % RENDERJOBS_MAX);
+	vPRenderJob pJob = _vgfx.jobBuffer.jobs + (nextJobIndex % RENDERJOBS_PER_CYCLE);
 	
 	/* set job and increment job counter */
 	pJob->job  = job;

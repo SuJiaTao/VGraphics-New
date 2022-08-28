@@ -248,7 +248,7 @@ static __forceinline vhExecuteJobs(void)
 		}
 
 		/* get job to execute */
-		_vgfx.jobBuffer.jobStartIndex %= RENDERJOBS_MAX;
+		_vgfx.jobBuffer.jobStartIndex %= RENDERJOBS_PER_CYCLE;
 		vPRenderJob toExecute = _vgfx.jobBuffer.jobs + _vgfx.jobBuffer.jobStartIndex;
 
 		/* execute job (if applicable) and the zero job memory */

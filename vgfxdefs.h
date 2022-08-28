@@ -39,9 +39,8 @@
 #define VGFX_CLEAR_COLOR			0.298f, 0.349f, 0.439f, 1.000f
 #define VGFX_FAILEDRENDER_COLOR		1.0f, 0.0f, 1.0f, 1.0f
 
-#define RENDERJOBS_MAX				0x100
+#define RENDERJOBS_PER_CYCLE		0x100
 #define RENDERJOB_WAIT_MSEC			4
-#define RENDERJOBS_PER_CYCLE		0x40
 
 /* ========== STRINGS							==========	*/
 #define VGFX_WINDOW_CLASS_NAME		"VGFX Render Window"
@@ -119,7 +118,7 @@ typedef struct vRenderJobBuffer
 {
 	vHNDL jobBufferLock;				/* sync object								*/
 
-	vRenderJob jobs[RENDERJOBS_MAX];	/* jobs are executed in FIFO order			*/
+	vRenderJob jobs[RENDERJOBS_PER_CYCLE];	/* jobs are executed in FIFO order			*/
 	vUI32	   jobsLeftToExecute;		/* job count								*/
 	vUI32	   jobStartIndex;			/* circular array head index				*/
 } vRenderJobBuffer, *vPRenderJobBuffer;
