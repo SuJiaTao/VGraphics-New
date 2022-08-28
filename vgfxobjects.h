@@ -16,14 +16,21 @@ VGFXAPI vT2 vGFXCreateTransformF(float x, float y, float r, float s);
 VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s);
 
 
-/* ========== RENDERABLE THINGS					==========	*/
+/* ========== RENDER OBJECTS					==========	*/
 VGFXAPI vPRenderObject vGFXCreateRenderObject(void);
 VGFXAPI vPRenderObject vGFXCreateRenderObjectR(vRect rect);
 VGFXAPI vPRenderObject vGFXCreateRenderObjectT(vRect rect, vPT2 transform);
 VGFXAPI vPRenderObject vGFXCreateRenderObjectEx(vRect rect, vPT2 transform, vPTexture texture);
 VGFXAPI void vGFXDestroyRenderObject(vPRenderObject object);
+
+
+/* ========== TEXTURES							==========	*/
 VGFXAPI void vGFXCreateTexture(vPTexture outTexture, vUI32 width, vUI32 height, 
 	vPBYTE byteData);
+VGFXAPI void vGFXCreateTextureSkinned(vPTexture outTexture, vUI32 tWidth, vUI32 tHeight,
+	vUI16 skinCount, vPBYTE byteData);
+VGFXAPI void vGFXCreateTexturePNG(vPTexture outTexture, vUI32 width, vUI32 height,
+	vUI16 skinCount, PCHAR filePath);
 VGFXAPI void vGFXDestroyTexture(vPTexture inTexture);
 
 

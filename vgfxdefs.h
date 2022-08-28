@@ -88,8 +88,6 @@ typedef struct vTexture
 	vUI16 skinCount;	/* each texture can have multiple skins, similar to	*/
 						/* kind of like frames of an animation.	each skin	*/
 						/* is lined up sequentially along the x axis		*/
-	vUI16 skinWidth;
-	vUI16 skinHeight;
 
 	GLuint glHandle;	/* handle to GPU side object of texture				*/
 } vTexture, *vPTexture;

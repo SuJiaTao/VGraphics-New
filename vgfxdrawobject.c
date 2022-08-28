@@ -36,15 +36,26 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 	glScalef(object->transform.scale * object->rectangle.width,
 			 object->transform.scale * object->rectangle.height, 1.0f);
 
+	/* setup texture skin */
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();
+
+	float textureSkinZoomScale = 1.0f / (float)(object->texture.skinCount + 1);
+	glTranslatef(object->skin * textureSkinZoomScale, 0.0f, 0.0f);
+	glScalef(textureSkinZoomScale, 1.0f, 1.0f);
+
 	/* setup shader uniform values */
 	GLfloat projectionMatrix[0x10];
 	GLfloat modelMatrix[0x10];
+	GLfloat textureMatrix[0x10];
 	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
 	glGetFloatv(GL_MODELVIEW_MATRIX , modelMatrix);
+	glGetFloatv(GL_TEXTURE_MATRIX   , textureMatrix);
 	
-	glUniform4f(1, object->tint.R, object->tint.G, object->tint.B, object->tint.A);
+	glUniform4fv(1, 1, &object->tint);
 	glUniformMatrix4fv(2, 1, GL_FALSE, projectionMatrix);
 	glUniformMatrix4fv(3, 1, GL_FALSE, modelMatrix);
+	glUniformMatrix4fv(4, 1, GL_FALSE, textureMatrix);
 
 	glEnable(GL_TEXTURE_2D);
 
