@@ -8,12 +8,32 @@
 
 
 /* ========== HELPER							==========	*/
-static __forceinline void vhEnsureContext()
+static __forceinline void vhEnsureContext(PCHAR funcName)
 {
 	if (GetThreadId(GetCurrentThread()) != GetThreadId(_vgfx.renderThread))
 	{
-		vLogError(__func__, "Tried to call GFX function on non-render thread.");
+		vLogError(funcName, "Tried to call GFX function on non-render thread.");
 	}
+}
+
+
+/* ========== LOGICAL OBJECTS					==========	*/
+VGFXAPI v2V vGFXCreateVector2(float x, float y)
+{
+	v2V rVector = { x, y };
+	return rVector;
+}
+
+VGFXAPI vT2 vGFXCreateTransformF(float x, float y, float r, float s)
+{
+	vT2 rTransform = { {x, y}, s, r };
+	return rTransform;
+}
+
+VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s)
+{
+	vT2 rTransform = { position, s, r };
+	return rTransform;
 }
 
 
@@ -40,15 +60,23 @@ VGFXAPI void vGFXDestroyRenderObject(vPRenderObject object)
 VGFXAPI void vGFXCreateTexture(vPTexture outTexture, vUI32 width, vUI32 height, 
 	vPBYTE byteData)
 {
-	vhEnsureContext();
+	vhEnsureContext(__func__);
 
+	/* generate texture with alpha support */
 	glGenTextures(1, &outTexture->glHandle);
 	glBindTexture(GL_TEXTURE_2D, outTexture->glHandle);
 	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGBA, width, height, ZERO, GL_RGBA, 
 		GL_UNSIGNED_BYTE, byteData);
 
+	/* forced linear filter */
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+VGFXAPI void vGFXDestroyTexture(vPTexture inTexture)
+{
+	vhEnsureContext(__func__);
+	glDeleteTextures(1, &inTexture->glHandle);
 }
 
 
