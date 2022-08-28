@@ -117,7 +117,7 @@ static LRESULT CALLBACK vGFXWindowProc(HWND winHndl, UINT message,
 	}
 
 	/* exec default window proc */
-	return DefWindowProcW(winHndl, message, wParam, lParam);
+	return DefWindowProcA(winHndl, message, wParam, lParam);
 }
 
 static __forceinline void vhUpdateWindow(void)
