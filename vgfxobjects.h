@@ -11,25 +11,26 @@
 
 
 /* ========== LOGICAL OBJECTS					==========	*/
+VGFXAPI vRect vGFXCreateRect(float width, float height);
+VGFXAPI vColor4 vGFXCreateColor3(float R, float G, float B);
+VGFXAPI vColor4 vGFXCreateColor4(float R, float G, float B, float A);
 VGFXAPI v2V vGFXCreateVector2(float x, float y);
 VGFXAPI vT2 vGFXCreateTransformF(float x, float y, float r, float s);
 VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s);
 
 
 /* ========== RENDER OBJECTS					==========	*/
-VGFXAPI vPRenderObject vGFXCreateRenderObject(void);
-VGFXAPI vPRenderObject vGFXCreateRenderObjectR(vRect rect);
-VGFXAPI vPRenderObject vGFXCreateRenderObjectT(vRect rect, vPT2 transform);
-VGFXAPI vPRenderObject vGFXCreateRenderObjectEx(vRect rect, vPT2 transform, vPTexture texture);
+VGFXAPI vPRenderObject vGFXCreateRenderObject(vRect rect, vPTexture texture);
+VGFXAPI vPRenderObject vGFXCreateRenderObjectT(vRect rect, vPTexture texture, vT2 transform);
 VGFXAPI void vGFXDestroyRenderObject(vPRenderObject object);
 
 
 /* ========== TEXTURES							==========	*/
-VGFXAPI void vGFXCreateTexture(vPTexture outTexture, vUI32 width, vUI32 height, 
+VGFXAPI vPTexture vGFXCreateTexture(vUI32 width, vUI32 height,
 	vPBYTE byteData);
-VGFXAPI void vGFXCreateTextureSkinned(vPTexture outTexture, vUI32 tWidth, vUI32 tHeight,
+VGFXAPI vPTexture vGFXCreateTextureSkinned(vUI32 tWidth, vUI32 tHeight,
 	vUI16 skinCount, vPBYTE byteData);
-VGFXAPI void vGFXCreateTexturePNG(vPTexture outTexture, vUI32 width, vUI32 height,
+VGFXAPI vPTexture vGFXCreateTexturePNG(vUI32 width, vUI32 height,
 	vUI16 skinCount, PCHAR filePath);
 VGFXAPI void vGFXDestroyTexture(vPTexture inTexture);
 

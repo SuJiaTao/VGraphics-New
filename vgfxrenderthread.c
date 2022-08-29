@@ -304,11 +304,10 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	ULONGLONG nextRenderTimeMsec    = 0;
 
 	/* create frame object */
-	_vgfx.frameObject = vGFXCreateRenderObject();
-	_vgfx.frameObject->render = FALSE; /* make invisible */
-	_vgfx.frameObject->texture.glHandle = _vgfx.framebufferTexture;
-	_vgfx.frameObject->rectangle.width  = VGFX_ASPECT_RATIO;
-	_vgfx.frameObject->rectangle.height = 1.0f;
+	_vgfx.frameObject = vGFXCreateRenderObject(vGFXCreateRect(VGFX_ASPECT_RATIO, 1.0f), NULL);
+	_vgfx.frameObject->render  = FALSE; /* make invisible */
+	_vgfx.frameObject->texture = vBufferAdd(_vgfx.textureBuffer);
+	_vgfx.frameObject->texture->glHandle = _vgfx.framebufferTexture;
 
 	vLogInfo(__func__, "VGFX Starting render loop.");
 	vDumpEntryBuffer(); /* dump in case of crash */

@@ -23,7 +23,8 @@
 
 
 /* ========== MAGIC NUMBERS						==========	*/
-#define RENDER_OBJECTS_MAX			0x400
+#define RENDER_OBJECTS_MAX			0x1000
+#define TEXTURE_OBJECTS_MAX			0x80
 #define VGFX_TERMINATE_TRYTIME_MSEC	0x400
 #define VGFX_TERMINATE_TRIES_MAX	0xA
 
@@ -96,10 +97,10 @@ typedef struct vRenderObject
 {
 	vBOOL render;			/* if 0, object is not rendered				*/
 
-	vColor4  tint;			/* all frags are multiplied by this value	*/
-	vTexture texture;		/* texture to be used						*/
-	vUI16	 skin;			/* current texture skin						*/
-	vRect	 rectangle;		/* object bounding rectangle				*/
+	vColor4   tint;			/* all frags are multiplied by this value	*/
+	vPTexture texture;		/* texture to be used						*/
+	vUI16	  skin;			/* current texture skin						*/
+	vRect	  rectangle;	/* object bounding rectangle				*/
 
 	vTransform2 transform;	/* object's spacial info					*/
 } vRenderObject, *vPRenderObject;
@@ -148,6 +149,8 @@ typedef struct _vGFXInternals
 	GLuint framebufferTexture;		/* framebuffer texture object		*/
 	GLuint framebufferDepth;		/* framebuffer depth componenet		*/
 	vTransform2 cameraTransform;	/* camera transform					*/
+
+	vHNDL textureBuffer;			/* buffer that holds all textures	*/
 
 	vHNDL  renderObjectBuffer;		/* objects to render				*/
 	GLuint renderObjectBaseRect;	/* base rect and UV					*/

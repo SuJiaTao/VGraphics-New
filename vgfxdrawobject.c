@@ -40,7 +40,7 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
 
-	float textureSkinZoomScale = 1.0f / (float)(object->texture.skinCount + 1);
+	float textureSkinZoomScale = 1.0f / (float)(object->texture->skinCount + 1);
 	glTranslatef(object->skin * textureSkinZoomScale, 0.0f, 0.0f);
 	glScalef(textureSkinZoomScale, 1.0f, 1.0f);
 
@@ -59,7 +59,7 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 
 	glEnable(GL_TEXTURE_2D);
 
-	glBindTexture(GL_TEXTURE_2D, object->texture.glHandle);
+	glBindTexture(GL_TEXTURE_2D, object->texture->glHandle);
 	glDrawArrays(GL_QUADS, 0, 4);
 
 	glDisable(GL_TEXTURE_2D);

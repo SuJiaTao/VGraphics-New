@@ -21,6 +21,24 @@ static __forceinline vBOOL vhEnsureContext(PCHAR funcName)
 
 
 /* ========== LOGICAL OBJECTS					==========	*/
+VGFXAPI vRect vGFXCreateRect(float width, float height)
+{
+	vRect rect = { width, height };
+	return rect;
+}
+
+VGFXAPI vColor4 vGFXCreateColor3(float R, float G, float B)
+{
+	vColor4 color = { R, G, B, 1.0f };
+	return color;
+}
+
+VGFXAPI vColor4 vGFXCreateColor4(float R, float G, float B, float A)
+{
+	vColor4 color = { R, G, B, A };
+	return color;
+}
+
 VGFXAPI v2V vGFXCreateVector2(float x, float y)
 {
 	v2V rVector = { x, y };
@@ -41,40 +59,21 @@ VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s)
 
 
 /* ========== RENDER OBJECTS					==========	*/
-VGFXAPI vPRenderObject vGFXCreateRenderObject(void)
+VGFXAPI vPRenderObject vGFXCreateRenderObject(vRect rect, vPTexture texture)
 {
 	vPRenderObject rObj = vBufferAdd(_vgfx.renderObjectBuffer);
-	rObj->render = TRUE;
-	rObj->rectangle.width  = 1.0f;
-	rObj->rectangle.height = 1.0f;
-	rObj->transform.scale  = 1.0f;
-	rObj->tint.R = 1.0f;
-	rObj->tint.G = 1.0f;
-	rObj->tint.B = 1.0f;
-	rObj->tint.A = 1.0f;
-	return rObj;
-}
-
-VGFXAPI vPRenderObject vGFXCreateRenderObjectR(vRect rect)
-{
-	vPRenderObject rObj = vGFXCreateRenderObject();
+	rObj->render	= TRUE;
 	rObj->rectangle = rect;
+	rObj->texture   = texture;
+	rObj->transform = vGFXCreateTransformF(0.0f, 0.0f, 0.0f, 1.0f);
+	rObj->tint		= vGFXCreateColor3(1.0f, 1.0f, 1.0f);
 	return rObj;
 }
 
-VGFXAPI vPRenderObject vGFXCreateRenderObjectT(vRect rect, vPT2 transform)
+VGFXAPI vPRenderObject vGFXCreateRenderObjectT(vRect rect, vPTexture texture, vT2 transform)
 {
-	vPRenderObject rObj = vGFXCreateRenderObjectR(rect);
-	vMemCopy(&rObj->transform, transform, sizeof(vT2));
-	return rObj;
-}
-
-VGFXAPI vPRenderObject vGFXCreateRenderObjectEx(vRect rect, vPT2 transform, vPTexture texture)
-{
-	if (vhEnsureContext(__func__)) return NULL;
-
-	vPRenderObject rObj = vGFXCreateRenderObjectT(rect, transform);
-	vMemCopy(&rObj->texture, texture, sizeof(vTexture));
+	vPRenderObject rObj = vGFXCreateRenderObject(rect, texture);
+	rObj->transform = transform;
 	return rObj;
 }
 
@@ -90,19 +89,21 @@ VGFXAPI void vGFXDestroyRenderObject(vPRenderObject object)
 
 
 /* ========== TEXTURES							==========	*/
-VGFXAPI void vGFXCreateTexture(vPTexture outTexture, vUI32 width, vUI32 height, 
+VGFXAPI vPTexture vGFXCreateTexture(vUI32 width, vUI32 height,
 	vPBYTE byteData)
 {
-	if (vhEnsureContext(__func__)) return;
+	if (vhEnsureContext(__func__)) return NULL;
+
+	vPTexture texObj = vBufferAdd(_vgfx.textureBuffer);
 
 	/* set texture object members */
-	vZeroMemory(outTexture, sizeof(vTexture));
-	outTexture->totalWidth  = width;
-	outTexture->totalHeight = height;
+	vZeroMemory(texObj, sizeof(vTexture));
+	texObj->totalWidth  = width;
+	texObj->totalHeight = height;
 
 	/* generate texture with alpha support */
-	glGenTextures(1, &outTexture->glHandle);
-	glBindTexture(GL_TEXTURE_2D, outTexture->glHandle);
+	glGenTextures(1, &texObj->glHandle);
+	glBindTexture(GL_TEXTURE_2D, texObj->glHandle);
 	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGBA, width, height, ZERO, GL_RGBA, 
 		GL_UNSIGNED_BYTE, byteData);
 
@@ -113,21 +114,27 @@ VGFXAPI void vGFXCreateTexture(vPTexture outTexture, vUI32 width, vUI32 height,
 	/* forced linear filter */
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	return texObj;
 }
 
-VGFXAPI void vGFXCreateTextureSkinned(vPTexture outTexture, vUI32 tWidth, vUI32 tHeight,
+VGFXAPI vPTexture vGFXCreateTextureSkinned(vUI32 tWidth, vUI32 tHeight,
 	vUI16 skinCount, vPBYTE byteData)
 {
-	if (vhEnsureContext(__func__)) return;
+	if (vhEnsureContext(__func__)) return NULL;
 
-	vGFXCreateTexture(outTexture, tWidth, tHeight, byteData);
-	outTexture->skinCount  = skinCount;
+	vPTexture texObj = vGFXCreateTexture(tWidth, tHeight, byteData);
+	texObj->skinCount  = skinCount;
+	return texObj;
 }
 
-VGFXAPI void vGFXCreateTexturePNG(vPTexture outTexture, vUI32 width, vUI32 height,
+VGFXAPI vPTexture vGFXCreateTexturePNG(vUI32 width, vUI32 height,
 	vUI16 skinCount, PCHAR filePath)
 {
-	if (vhEnsureContext(__func__)) return;
+	if (vhEnsureContext(__func__)) return NULL;
+
+	/* texture Object to return */
+	vPTexture texObj = NULL;
 
 	vLogInfoFormatted(__func__, "Creating texture from file path: %s.", filePath);
 
@@ -136,7 +143,7 @@ VGFXAPI void vGFXCreateTexturePNG(vPTexture outTexture, vUI32 width, vUI32 heigh
 	if (fileHndl == INVALID_HANDLE_VALUE) 
 	{
 		vLogError(__func__, "Failed open file.");
-		return;
+		return NULL;
 	}
 
 	/* load file into primary memory */
@@ -146,7 +153,7 @@ VGFXAPI void vGFXCreateTexturePNG(vPTexture outTexture, vUI32 width, vUI32 heigh
 	if (result == FALSE)
 	{
 		vLogError(__func__, "Failed to read file.");
-		return;
+		return NULL;
 	}
 
 	vUI32 readPointer = 8;	/* move past header */
@@ -190,7 +197,8 @@ VGFXAPI void vGFXCreateTexturePNG(vPTexture outTexture, vUI32 width, vUI32 heigh
 				imageByteIndex = imageByteIndex + (width * 4) + 1;
 			}
 
-			vGFXCreateTextureSkinned(outTexture, width, height, skinCount,
+			/* create texture using parsed block */
+			texObj = vGFXCreateTextureSkinned(width, height, skinCount,
 				parsedBlock);
 
 			/* free memory and break */
@@ -205,12 +213,16 @@ VGFXAPI void vGFXCreateTexturePNG(vPTexture outTexture, vUI32 width, vUI32 heigh
 	/* free data */
 	vFree(fileBlock);
 	vFileClose(fileHndl);
+
+	vLogInfoFormatted(__func__, "Texture created from PNG!");
+	return texObj;
 }
 
 VGFXAPI void vGFXDestroyTexture(vPTexture inTexture)
 {
 	if (vhEnsureContext(__func__)) return;
 	glDeleteTextures(1, &inTexture->glHandle);
+	vBufferRemove(_vgfx.textureBuffer, inTexture);
 }
 
 

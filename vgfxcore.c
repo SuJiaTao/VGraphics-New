@@ -27,6 +27,8 @@ VGFXAPI vBOOL vGFXInitialize(void)
 	_vgfx.renderThreadLock   = vCreateLock();
 	_vgfx.renderObjectBuffer = vCreateBuffer("VGFX Render Object Buffer",
 		sizeof(vRenderObject), RENDER_OBJECTS_MAX);
+	_vgfx.textureBuffer = vCreateBuffer("VGFX Texture Object Buffer",
+		sizeof(vTexture), TEXTURE_OBJECTS_MAX);
 	_vgfx.jobBuffer.jobBufferLock = vCreateLock();
 	vGFXCameraResetAll();
 
@@ -73,6 +75,7 @@ VGFXAPI vBOOL vGFXTerminate(void)
 	/* free vcore resources and zero memory */
 	vDestroyLock(_vgfx.renderThreadLock);
 	vDestroyBuffer(_vgfx.renderObjectBuffer);
+	vDestroyBuffer(_vgfx.textureBuffer);
 	vDestroyLock(_vgfx.jobBuffer.jobBufferLock);
 	vZeroMemory(&_vgfx, sizeof(_vgfx));
 
