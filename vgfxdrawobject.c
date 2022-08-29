@@ -32,7 +32,7 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 	glLoadIdentity();
 
 	glTranslatef(object->transform.position.x, object->transform.position.y, 
-		(float)object->layer / 255.0f);
+		(float)object->transform.layer / 255.0f);
 	glRotatef(object->transform.rotation, 0.0f, 0.0f, 1.0f);
 	glScalef(object->transform.scale * object->rectangle.width,
 			 object->transform.scale * object->rectangle.height, 1.0f);

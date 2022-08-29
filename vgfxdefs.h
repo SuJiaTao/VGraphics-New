@@ -46,9 +46,6 @@
 /* ========== STRINGS							==========	*/
 #define VGFX_WINDOW_CLASS_NAME		"VGFX Render Window"
 
-#define VGFX_SHADER_VERTEX_NAME		"vgfx_vert.txt"
-#define VGFX_SHADER_FRAGMENT_NAME	"vgfx_frag.txt"
-
 
 /* ========== TYPE DEFS							==========	*/
 typedef void (*vGFXPFRenderJob)(vPTR data);
@@ -65,6 +62,7 @@ typedef struct vT2
 	v2V   position;
 	float scale;
 	float rotation;
+	vUI8  layer;		/* transform layer (0 bottom, 255 top)	*/
 } vT2, *vPT2, vTransform2, *vPTransform2;
 
 typedef struct vRect
@@ -101,7 +99,6 @@ typedef struct vRenderObject
 	vPTexture texture;		/* texture to be used						*/
 	vUI16	  skin;			/* current texture skin						*/
 	vRect	  rectangle;	/* object bounding rectangle				*/
-	vUI8	  layer;		/* object layer (0 bottom, 255 top)			*/
 
 	vTransform2 transform;	/* object's spacial info					*/
 } vRenderObject, *vPRenderObject;

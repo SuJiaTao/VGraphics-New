@@ -23,6 +23,7 @@ static __forceinline vhDestroyWindow(HWND winHndl)
 	/* free resources */
 	wglDeleteContext(_vgfx.renderContext);
 	ReleaseDC(winHndl, _vgfx.deviceContext);
+	UnregisterClassA(VGFX_WINDOW_CLASS_NAME, NULL);
 }
 
 static __forceinline void vhInitializeShaderProgram(void)
@@ -32,15 +33,21 @@ static __forceinline void vhInitializeShaderProgram(void)
 	GLuint vertexShader, fragmentShader;
 
 
+	vLogInfo(__func__, "Compiling vertex shader.");
+
 	/* compile vertex shader */
 	vertexShader = vGFXCompileShader(GL_VERTEX_SHADER, vGFXGetVertexShaderSource());
 	if (vertexShader == ZERO) { vCoreFatalError(__func__, "Vertex shader could not be compiled."); }
 
-	vLogInfo(__func__, "Vertex shader loaded and compiled sucessfully.");
+	vLogInfo(__func__, "Vertex shader compiled sucessfully.");
+
+	vLogInfo(__func__, "Compiling fragment shader.");
 
 	/* compile fragment shader */
 	fragmentShader = vGFXCompileShader(GL_FRAGMENT_SHADER, vGFXGetFragmentShaderSource());
 	if (fragmentShader == ZERO) { vCoreFatalError(__func__, "Fragment shader could not be compiled."); }
+
+	vLogInfo(__func__, "Fragment shader compiled sucessfully.");
 
 	/* create shader program and use */
 	_vgfx.shaderProgram = vGFXCreateShaderProgram(vertexShader, fragmentShader);
@@ -222,7 +229,7 @@ static __forceinline void vhInitializeRenderWindow(void)
 
 }
 
-static __forceinline vhExecuteJobs(void)
+static __forceinline vhExecuteRenderJobs(void)
 {
 	for (vUI32 jobCount = 0; jobCount < RENDERJOBS_PER_CYCLE; jobCount++)
 	{
@@ -317,9 +324,6 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 		/* update window */
 		vhUpdateWindow();
 
-		/* execute jobs */
-		vhExecuteJobs();
-
 		/* ensure window aspect ratio is fixed and set window height and width vars */
 		RECT windowRect, clientRect;
 		GetWindowRect(_vgfx.renderWindow, &windowRect);
@@ -346,6 +350,9 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 		glRotatef(_vgfx.cameraTransform.rotation, 0, 0, 1.0f);
 		glTranslatef(-_vgfx.cameraTransform.position.x, -_vgfx.cameraTransform.position.y, 0.0f);
 		glScalef(_vgfx.cameraTransform.scale, _vgfx.cameraTransform.scale, 1.0f);
+
+		/* execute render jobs */
+		vhExecuteRenderJobs();
 
 		/* draw all objects */
 		vGFXDrawRenderObjects();
