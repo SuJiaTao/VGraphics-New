@@ -10,6 +10,10 @@
 #include "vgfx.h"
 
 
+/* ========== SHADER SOURCE						==========	*/
+VGFXAPI vPCHAR vGFXGetVertexShaderSource(void);
+VGFXAPI vPCHAR vGFXGetFragmentShaderSource(void);
+
 /* ========== SHADER LOADING					==========	*/
 VGFXAPI vBOOL vGFXLoadShader(vPCHAR buffer, vUI32 bufferSize,
 	const vPCHAR shaderPath);

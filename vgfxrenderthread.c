@@ -31,28 +31,16 @@ static __forceinline void vhInitializeShaderProgram(void)
 	vBOOL loadResult;
 	GLuint vertexShader, fragmentShader;
 
-	/* allocate source buffer */
-	vPCHAR shaderSourceBuff = vAllocZeroed(VGFX_SHADERSOURCE_SIZE_MAX);
 
-	/* load and compile vertex shader */
-	loadResult = vGFXLoadShader(shaderSourceBuff, VGFX_SHADERSOURCE_SIZE_MAX,
-		VGFX_SHADER_VERTEX_NAME);
-	if (loadResult == FALSE) { vCoreFatalError(__func__, "Vertex shader could not be loaded."); }
-	vertexShader = vGFXCompileShader(GL_VERTEX_SHADER, shaderSourceBuff);
+	/* compile vertex shader */
+	vertexShader = vGFXCompileShader(GL_VERTEX_SHADER, vGFXGetVertexShaderSource());
 	if (vertexShader == ZERO) { vCoreFatalError(__func__, "Vertex shader could not be compiled."); }
 
 	vLogInfo(__func__, "Vertex shader loaded and compiled sucessfully.");
-	vZeroMemory(shaderSourceBuff, VGFX_SHADERSOURCE_SIZE_MAX);
 
-	/* load and compile fragment shader */
-	loadResult = vGFXLoadShader(shaderSourceBuff, VGFX_SHADERSOURCE_SIZE_MAX,
-		VGFX_SHADER_FRAGMENT_NAME);
-	if (loadResult == FALSE) { vCoreFatalError(__func__, "Fragment shader could not be loaded."); }
-	fragmentShader = vGFXCompileShader(GL_FRAGMENT_SHADER, shaderSourceBuff);
+	/* compile fragment shader */
+	fragmentShader = vGFXCompileShader(GL_FRAGMENT_SHADER, vGFXGetFragmentShaderSource());
 	if (fragmentShader == ZERO) { vCoreFatalError(__func__, "Fragment shader could not be compiled."); }
-
-	/* free shader source buffer */
-	vFree(shaderSourceBuff);
 
 	/* create shader program and use */
 	_vgfx.shaderProgram = vGFXCreateShaderProgram(vertexShader, fragmentShader);
