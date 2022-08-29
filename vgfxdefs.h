@@ -24,7 +24,7 @@
 
 /* ========== MAGIC NUMBERS						==========	*/
 #define RENDER_OBJECTS_MAX			0x1000
-#define TEXTURE_OBJECTS_MAX			0x80
+#define TEXTURE_OBJECTS_MAX			0x100
 #define VGFX_TERMINATE_TRYTIME_MSEC	0x400
 #define VGFX_TERMINATE_TRIES_MAX	0xA
 
@@ -101,6 +101,7 @@ typedef struct vRenderObject
 	vPTexture texture;		/* texture to be used						*/
 	vUI16	  skin;			/* current texture skin						*/
 	vRect	  rectangle;	/* object bounding rectangle				*/
+	vUI8	  layer;		/* object layer (0 bottom, 255 top)			*/
 
 	vTransform2 transform;	/* object's spacial info					*/
 } vRenderObject, *vPRenderObject;

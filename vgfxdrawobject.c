@@ -31,7 +31,8 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glTranslatef(object->transform.position.x, object->transform.position.y, 0.0f);
+	glTranslatef(object->transform.position.x, object->transform.position.y, 
+		(float)object->layer / 255.0f);
 	glRotatef(object->transform.rotation, 0.0f, 0.0f, 1.0f);
 	glScalef(object->transform.scale * object->rectangle.width,
 			 object->transform.scale * object->rectangle.height, 1.0f);
@@ -58,11 +59,13 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 	glUniformMatrix4fv(4, 1, GL_FALSE, textureMatrix);
 
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
 
 	glBindTexture(GL_TEXTURE_2D, object->texture->glHandle);
 	glDrawArrays(GL_QUADS, 0, 4);
 
 	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_DEPTH_TEST);
 }
 
 VGFXAPI void vGFXDrawRenderObjects(void)
