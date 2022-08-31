@@ -10,7 +10,7 @@
 
 
 /* ========== HELPER					==========	*/
-static void vhDrawRenderObjectCallback(vHNDL buffer, vUI16 index, vPRenderObject element)
+static void vhDrawRenderObjectCallback(vPRenderBuffer buffer, vUI16 index, vPRenderObject element)
 {
 	/* check if to skip render */
 	if (element->render == FALSE) return;
@@ -20,12 +20,19 @@ static void vhDrawRenderObjectCallback(vHNDL buffer, vUI16 index, vPRenderObject
 
 
 /* ========== OBJECT DRAWING					==========	*/
-VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
+VGFXAPI void vGFXDrawRenderObject(vPRenderBuffer buffer, vPRenderObject object)
 {
-	/* setup shader data */
+	/* switch to using object's associated shader */
+	glUseProgram(buffer->renderBehavior.shader);
+
+	/* bind to default vertex buffer */
 	glBindBuffer(GL_ARRAY_BUFFER, _vgfx.renderObjectBaseRect);
-	glBindVertexArray(_vgfx.vertexAttributes);
-	glUseProgram(_vgfx.shaderProgram);
+
+	/* */
+
+	/* call shader setup */
+	vPBYTE objectAttributePtr = (vPBYTE)object + sizeof(vRenderObject);
+	buffer->renderBehavior.shaderSetupFunc(objectAttributePtr, object);
 
 	/* apply transformations */
 	glMatrixMode(GL_MODELVIEW);
@@ -70,5 +77,5 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 
 VGFXAPI void vGFXDrawRenderObjects(void)
 {
-	vBufferIterate(_vgfx.renderObjectBuffer, vhDrawRenderObjectCallback);
+	vBufferIterate(_vgfx.renderBuffers, vhDrawRenderObjectCallback);
 }

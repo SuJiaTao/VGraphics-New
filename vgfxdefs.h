@@ -23,8 +23,8 @@
 
 
 /* ========== MAGIC NUMBERS						==========	*/
-#define RENDER_OBJECTS_MAX			0x1000
-#define TEXTURE_OBJECTS_MAX			0x100
+#define RENDER_BUFFERS_MAX			0x100
+#define TEXTURE_OBJECTS_MAX			0x200
 #define VGFX_TERMINATE_TRYTIME_MSEC	0x400
 #define VGFX_TERMINATE_TRIES_MAX	0xA
 
@@ -40,6 +40,8 @@
 #define VGFX_CLEAR_COLOR			0.298f, 0.349f, 0.439f, 1.000f
 #define VGFX_FAILEDRENDER_COLOR		1.0f, 0.0f, 1.0f, 1.0f
 
+#define RENDERATTRIBUTE_SIZE_MIN	4
+
 #define RENDERJOBS_PER_CYCLE		0x100
 #define RENDERJOB_WAIT_MSEC			4
 
@@ -49,6 +51,9 @@
 
 /* ========== TYPE DEFS							==========	*/
 typedef void (*vGFXPFRenderJob)(vPTR data);
+typedef void (*vGFXPFRenderAttributeSetup)(struct vRenderBehavior* behavior, vPTR renderAttribute);
+typedef void (*vGFXPFRenderMethod)(vPTR renderAttribute, struct vRenderObject* object,
+	float projectionMatrix[0x10], float modelMatrix[0x10], float textureMatrix[0x10]);
 
 /* ========== STRUCTURES						==========	*/
 typedef struct v2V
@@ -91,17 +96,46 @@ typedef struct vTexture
 	GLuint glHandle;	/* handle to GPU side object of texture				*/
 } vTexture, *vPTexture;
 
+typedef struct vRenderBehavior
+{
+	GLuint			   shader;			/* gl Handle to shader object			*/
+	vGFXPFRenderMethod renderMethod;	/* render logic for renderObjects		*/
+	
+	/* render attribute is a block of data which is associated with a given		*/
+	/* render behavior and is the same to all render objects using the bhvr		*/
+	vUI32 renderAttributeSizeBytes;
+	vPTR  renderAttributePtr;
+
+	/* this is called once when the render behavior is created to initialize	*/
+	/* the data within the render attribute										*/
+	vGFXPFRenderAttributeSetup renderAttributeSetup;
+
+	/* object attribute is a block of data which is associated with each		*/
+	/* render object and is passed to the rendermethod							*/
+	vUI32 objectAttributeSizeBytes;	
+} vRenderBehavior, *vPRenderBehavior;
+
 typedef struct vRenderObject
 {
+	/* determines how the object is to be rendered */
+	vPRenderBehavior renderBehavior;
+
 	vBOOL render;			/* if 0, object is not rendered				*/
+	
+	vPTexture texture;		/* texture to be used						*/
 
 	vColor4   tint;			/* all frags are multiplied by this value	*/
-	vPTexture texture;		/* texture to be used						*/
 	vUI16	  skin;			/* current texture skin						*/
 	vRect	  rectangle;	/* object bounding rectangle				*/
 
 	vTransform2 transform;	/* object's spacial info					*/
 } vRenderObject, *vPRenderObject;
+
+typedef struct vRenderBuffer
+{
+	vRenderBehavior renderBehavior;	/* how to draw each object	*/
+	vHNDL objectBuffer;				/* object buffer			*/
+} vRenderBuffer, *vPRenderBuffer;
 
 typedef struct vRenderJob
 {
@@ -150,7 +184,9 @@ typedef struct _vGFXInternals
 
 	vHNDL textureBuffer;			/* buffer that holds all textures	*/
 
-	vHNDL  renderObjectBuffer;		/* objects to render				*/
+	/* buffer of buffers that hold render objects.						*/
+	vHNDL  renderBuffers;
+
 	GLuint renderObjectBaseRect;	/* base rect and UV					*/
 
 	vRenderJobBuffer jobBuffer;		/* jobs to execute per render cycle */
