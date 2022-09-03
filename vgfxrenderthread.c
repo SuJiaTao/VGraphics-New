@@ -220,7 +220,7 @@ static __forceinline vhRenderFrame(void)
 	glClearColor(VGFX_FAILEDRENDER_COLOR);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	
-	vGFXDrawRenderObject(_vgfx.frameObjectBuffer, _vgfx.frameObject);
+	vGFXDrawRenderObject(_vgfx.frameObject);
 }
 
 static __forceinline void vhInitializeFramebuffer(void)

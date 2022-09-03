@@ -155,6 +155,7 @@ VGFXAPI vPRenderObject vGFXCreateRenderObject(vPRenderBuffer buff, vRect rect,
 	vPRenderObject rObj = vBufferAdd(buff->objectBuffer);
 
 	/* set all members */
+	rObj->renderBuffer   = buff;
 	rObj->renderBehavior = &buff->renderBehavior;
 	rObj->render	= TRUE;
 	rObj->rectangle = rect;

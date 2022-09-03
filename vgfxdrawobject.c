@@ -10,20 +10,20 @@
 
 
 /* ========== HELPER					==========	*/
-static void vhDrawRenderObjectCallback(vPRenderBuffer buffer, vUI16 index, vPRenderObject element)
+static void vhDrawRenderObjectCallback(vHNDL buffer, vUI16 index, vPRenderObject element)
 {
 	/* check if to skip render */
 	if (element->render == FALSE) return;
 
-	vGFXDrawRenderObject(buffer, element);
+	vGFXDrawRenderObject(element);
 }
 
 
 /* ========== OBJECT DRAWING					==========	*/
-VGFXAPI void vGFXDrawRenderObject(vPRenderBuffer buffer, vPRenderObject object)
+VGFXAPI void vGFXDrawRenderObject(vPRenderObject object)
 {
 	/* switch to using object's associated shader */
-	glUseProgram(buffer->renderBehavior->shader);
+	glUseProgram(object->renderBehavior->shader);
 
 	/* apply transformations */
 	glMatrixMode(GL_PROJECTION);
@@ -68,6 +68,7 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderBuffer buffer, vPRenderObject object)
 
 	/* call render method */
 	vPBYTE objectAttributePtr = (vPBYTE)object + sizeof(vRenderObject);
+	vPRenderBuffer buffer = object->renderBuffer;
 	buffer->renderBehavior->renderMethod(buffer->renderBehavior->renderAttributePtr,
 		objectAttributePtr, object, projectionMatrix, modelMatrix, textureMatrix);
 }

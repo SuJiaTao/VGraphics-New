@@ -120,6 +120,9 @@ typedef struct vRenderBehavior
 
 typedef struct vRenderObject
 {
+	/* render buffer that the object is associated with */
+	struct vRenderBuffer* renderBuffer;
+
 	/* determines how the object is to be rendered */
 	vPRenderBehavior renderBehavior;
 

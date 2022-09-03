@@ -11,7 +11,7 @@
 
 
 /* ========== OBJECT DRAWING					==========	*/
-VGFXAPI void vGFXDrawRenderObject(vPRenderBuffer buffer, vPRenderObject object);
+VGFXAPI void vGFXDrawRenderObject(vPRenderObject object);
 VGFXAPI void vGFXDrawRenderObjects(vPRenderBuffer buffer);
 
 #endif
