@@ -26,7 +26,7 @@
 #define RENDER_BEHAVIORS_MAX		0x40
 #define RENDER_BUFFERS_MAX			0x100
 #define TEXTURE_OBJECTS_MAX			0x200
-#define DEFAULT_RENDER_BUFFER_SIZE	0x010
+#define FRAMEOBJECT_BUFFER_SIZE		0x010
 #define VGFX_TERMINATE_TRYTIME_MSEC	0x400
 #define VGFX_TERMINATE_TRIES_MAX	0xA
 
@@ -183,11 +183,12 @@ typedef struct _vGFXInternals
 	vUI64 renderFrameCount;	/* increments with every frame rendered		*/
 
 	GLuint defaultShader;			/* default shader program			*/
-	vPRenderBuffer defaultRenderBuffer;	/* default RenderBuffer			*/
+	vPRenderBehavior defaultRenderBehavior;	/* default render behavior	*/
 	
 	GLuint  framebuffer;			/* framebuffer to render to			*/
 	GLuint  framebufferTexture;		/* framebuffer texture object		*/
 	GLuint  framebufferDepth;		/* framebuffer depth componenet		*/
+	vPRenderBuffer frameObjectBuffer;	/* buffer which holds frameobject	*/
 	vPRenderObject frameObject;		/* framebuffer render object		*/
 
 	vTransform2 cameraTransform;	/* camera transform					*/

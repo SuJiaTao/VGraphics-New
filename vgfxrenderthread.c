@@ -26,7 +26,7 @@ static __forceinline vhDestroyWindow(HWND winHndl)
 	UnregisterClassA(VGFX_WINDOW_CLASS_NAME, NULL);
 }
 
-static __forceinline void vhInitializeShaderProgram(void)
+static __forceinline void vhCreateDefaultShader(void)
 {
 	vLogInfo(__func__, "Initializing shaders.");
 	vBOOL loadResult;
@@ -121,51 +121,6 @@ static __forceinline void vhUpdateWindow(void)
 	MSG messageBuff;
 	PeekMessageA(&messageBuff, NO_WINDOW, ZERO, ZERO, PM_REMOVE);
 	DispatchMessageA(&messageBuff);
-}
-
-static __forceinline void vhInitializeFramebuffer(void)
-{
-	/* generate openGL objects  and bind */
-	vLogInfo(__func__, "Generating framebuffer render objects.");
-	glGenFramebuffers(1, &_vgfx.framebuffer);
-	glGenTextures(1, &_vgfx.framebufferTexture);
-	glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebuffer);
-	glBindTexture(GL_TEXTURE_2D, _vgfx.framebufferTexture);
-
-	/* set texture size */
-	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGB,
-		VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT, ZERO,
-		GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-	/* make fb texture filter to nearest */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	/* generate depth component and bind */
-	vLogInfo(__func__, "Generating framebuffer depth object.");
-	glGenRenderbuffers(1, &_vgfx.framebufferDepth);
-	glBindRenderbuffer(GL_RENDERBUFFER, _vgfx.framebufferDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 
-		VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT);
-
-	/* connect to framebuffer and enable depth testing */
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-		GL_RENDERBUFFER, _vgfx.framebufferDepth);
-	glEnable(GL_DEPTH_TEST);
-
-	/* connect texture to framebuffer */
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-		_vgfx.framebufferTexture, NULL);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
-	GLenum framebufferCheck = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (framebufferCheck != GL_FRAMEBUFFER_COMPLETE)
-	{
-		vLogErrorFormatted(__func__, "Framebuffer incomplete! Framebuffer status: %d.", framebufferCheck);
-		vCoreFatalError(__func__, "Framebuffer incomplete.");
-	}
-
-	vLogInfo(__func__, "Framebuffer initialized.");
 }
 
 static __forceinline void vhInitializeRenderWindow(void)
@@ -264,15 +219,53 @@ static __forceinline vhRenderFrame(void)
 	glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
 	glClearColor(VGFX_FAILEDRENDER_COLOR);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-	/* clear all */
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
-	glViewport(0, 0, _vgfx.renderClientWidth, _vgfx.renderClientHeight);
 	
-	vGFXDrawRenderObject(_vgfx.defaultRenderBuffer, _vgfx.frameObject);
+	vGFXDrawRenderObject(_vgfx.frameObjectBuffer, _vgfx.frameObject);
+}
+
+static __forceinline void vhInitializeFramebuffer(void)
+{
+	/* generate openGL objects  and bind */
+	vLogInfo(__func__, "Generating framebuffer render objects.");
+	glGenFramebuffers(1, &_vgfx.framebuffer);
+	glGenTextures(1, &_vgfx.framebufferTexture);
+	glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebuffer);
+	glBindTexture(GL_TEXTURE_2D, _vgfx.framebufferTexture);
+
+	/* set texture size */
+	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGB,
+		VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT, ZERO,
+		GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	/* make fb texture filter to nearest */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	/* generate depth component and bind */
+	vLogInfo(__func__, "Generating framebuffer depth object.");
+	glGenRenderbuffers(1, &_vgfx.framebufferDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, _vgfx.framebufferDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
+		VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT);
+
+	/* connect to framebuffer and enable depth testing */
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+		GL_RENDERBUFFER, _vgfx.framebufferDepth);
+	glEnable(GL_DEPTH_TEST);
+
+	/* connect texture to framebuffer */
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+		_vgfx.framebufferTexture, NULL);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	GLenum framebufferCheck = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (framebufferCheck != GL_FRAMEBUFFER_COMPLETE)
+	{
+		vLogErrorFormatted(__func__, "Framebuffer incomplete! Framebuffer status: %d.", framebufferCheck);
+		vCoreFatalError(__func__, "Framebuffer incomplete.");
+	}
+
+	vLogInfo(__func__, "Framebuffer initialized.");
 }
 
 static void vhDefaultRenderAttributeSetup(vPRenderBehavior behavior,
@@ -316,9 +309,12 @@ static void vhDefaultRenderMethod(vPDefaultRenderAttribute renderAttribute,
 	vPTR objectAttribute, vPRenderObject object, GLfloat projectionMatrix[0x10],
 	GLfloat modelMatrix[0x10], GLfloat textureMatrix[0x10])
 {
-	/* if object is frame object, draw to default framebuffer */
+	/* if object is frame object, setup projection and draw to default framebuffer */
 	if (object == _vgfx.frameObject)
 	{
+		glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
+		glViewport(0, 0, _vgfx.renderClientWidth, _vgfx.renderClientHeight);
+
 		glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
 	}
 
@@ -346,21 +342,14 @@ static void vhDefaultRenderMethod(vPDefaultRenderAttribute renderAttribute,
 	glDisable(GL_DEPTH_TEST);
 }
 
-static void vhInitializeDefaultRenderBuffer(void)
+static void vhRenderBufferIterateFunc(vHNDL buffer, vUI16 index, vPRenderBuffer buffPtr)
 {
-	/* create default render buffer */
-	_vgfx.defaultRenderBuffer = vGFXCreateRenderBuffer(_vgfx.defaultShader,
-		vhDefaultRenderMethod, sizeof(vDefaultRenderAttribute), vhDefaultRenderAttributeSetup,
-		ZERO, DEFAULT_RENDER_BUFFER_SIZE);
+	vGFXDrawRenderObjects(buffPtr);
+}
 
-	/* create frame object */
-	_vgfx.frameObject = vGFXCreateRenderObject(_vgfx.defaultRenderBuffer,
-		vGFXCreateRect(VGFX_ASPECT_RATIO, 1.0f), NULL);
-	_vgfx.frameObject->render  = FALSE; /* make invisible */
-	_vgfx.frameObject->texture = vBufferAdd(_vgfx.textureBuffer);
-	
-	/* set texture to framebuffer texture */
-	_vgfx.frameObject->texture->glHandle = _vgfx.framebufferTexture;
+static __forceinline void vhDrawAllObjects(void)
+{
+	vBufferIterate(_vgfx.renderBuffers, vhRenderBufferIterateFunc);
 }
 
 /* ========== RENDER THREAD ENTRY POINT			==========	*/
@@ -374,11 +363,21 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	/* initialize render window */
 	vhInitializeRenderWindow();
 
-	/* load, compile and use shaders */
-	vhInitializeShaderProgram();
+	/* initialize default shader program */
+	vhCreateDefaultShader();
 
-	/* setup shader vertex arrays */
-	vGFXSetupShaderVertexAttributes();
+	/* create default render behavior */
+	_vgfx.defaultRenderBehavior = vGFXCreateRenderBehavior(_vgfx.defaultShader,
+		vhDefaultRenderMethod, sizeof(vDefaultRenderAttribute), vhDefaultRenderAttributeSetup,
+		ZERO);
+
+	/* create frameobject and it's associated buffer */
+	_vgfx.frameObjectBuffer = vGFXCreateRenderBuffer(_vgfx.defaultRenderBehavior,
+		FRAMEOBJECT_BUFFER_SIZE);
+	_vgfx.frameObject = vGFXCreateRenderObject(_vgfx.frameObjectBuffer,
+		vGFXCreateRect(VGFX_ASPECT_RATIO, 1.0f), NULL);
+	_vgfx.frameObject->render = FALSE;	/* require manual rendering	*/
+	_vgfx.frameObject->texture = _vgfx.framebufferTexture;
 
 	/* render time related variables */
 	ULONGLONG currentRenderTimeMsec = 0;
@@ -416,27 +415,16 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 		_vgfx.renderClientWidth  = clientRect.right  - clientRect.left;
 		_vgfx.renderClientHeight = clientRect.bottom - clientRect.top;
 
-		/* switch to custom framebuffer, clear and setup projection */
+		/* switch to custom framebuffer, and clear */
 		glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebuffer);
 		glClearColor(VGFX_CLEAR_COLOR);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-
-		glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
-		glViewport(0, 0, VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT);
-
-		/* perform camera transform */
-		glRotatef(_vgfx.cameraTransform.rotation, 0, 0, 1.0f);
-		glTranslatef(-_vgfx.cameraTransform.position.x, -_vgfx.cameraTransform.position.y, 0.0f);
-		glScalef(_vgfx.cameraTransform.scale, _vgfx.cameraTransform.scale, 1.0f);
 
 		/* execute render jobs */
 		vhExecuteRenderJobs();
 
 		/* draw all objects */
-		vGFXDrawRenderObjects();
+		vhDrawAllObjects();
 
 		/* switch to default framebuffer, and render frame */
 		vhRenderFrame();

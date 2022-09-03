@@ -26,6 +26,18 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderBuffer buffer, vPRenderObject object)
 	glUseProgram(buffer->renderBehavior->shader);
 
 	/* apply transformations */
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
+	glViewport(0, 0, VGFX_RESOLUTION_WIDTH, VGFX_RESOLUTION_HEIGHT);
+
+	/* perform camera transform */
+	glRotatef(_vgfx.cameraTransform.rotation, 0, 0, 1.0f);
+	glTranslatef(-_vgfx.cameraTransform.position.x, -_vgfx.cameraTransform.position.y, 0.0f);
+	glScalef(_vgfx.cameraTransform.scale, _vgfx.cameraTransform.scale, 1.0f);
+
+	/* perform model transform */
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
