@@ -57,62 +57,84 @@ VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s)
 	return rTransform;
 }
 
+/* ========== RENDER BEHAVIORS					==========	*/
+VGFXAPI vPRenderBehavior vGFXCreateRenderBehavior(GLuint shader, vGFXPFRenderMethod renderMethod,
+	vUI32 renderAttributeSize, vGFXPFRenderAttributeSetup renderAttributeSetup,
+	vUI32 objectAttributeSize)
+{
+	vGFXLock();
+
+	/* create object */
+	vPRenderBehavior bhv = vBufferAdd(_vgfx.renderBehaviorBuffer);
+	
+	/* setup members */
+	bhv->shader = shader;
+	bhv->renderMethod = renderMethod;
+	bhv->renderAttributeSizeBytes = renderAttributeSize;
+	bhv->renderAttributeSetup = renderAttributeSetup;
+	bhv->objectAttributeSizeBytes = objectAttributeSize;
+	bhv->renderAttributePtr = vAllocZeroed(max(renderAttributeSize, 
+		RENDERATTRIBUTE_SIZE_MIN));
+
+	/* call initialization method */
+	if (bhv->renderAttributeSetup != NULL)
+	{
+		bhv->renderAttributeSetup(bhv, bhv->renderAttributePtr);
+	}
+
+	/* log warnings if possible */
+	if (renderMethod == NULL) vLogWarning(__func__, "Created RenderBehavior with NULL render method.");
+
+	vGFXUnlock();
+
+	return bhv;
+}
+
+VGFXAPI void vGFXDestroyRenderBehavior(vPRenderBehavior behavior)
+{
+	vGFXLock();
+
+	/* free block and remove from buffer */
+	vFree(behavior->renderAttributePtr);
+	vBufferRemove(_vgfx.renderBehaviorBuffer, behavior);
+
+	vGFXUnlock();
+}
+
 
 /* ========== RENDER BUFFERS					==========	*/
-VGFXAPI vPRenderBuffer vGFXCreateRenderBuffer(GLuint shader, vGFXPFRenderMethod renderMethod,
-	vUI32 renderAttributeSize, vGFXPFRenderAttributeSetup renderAttributeSetup,
-	vUI32 objectAttributeSize, vUI16 capacity)
+VGFXAPI vPRenderBuffer vGFXCreateRenderBuffer(vPRenderBehavior behavior, vUI16 capacity)
 {
+	vGFXLock();
+
 	/* allocate buffer and setup render behavior */
 	vPRenderBuffer renderBuffer = vBufferAdd(_vgfx.renderBuffers);
+	renderBuffer->renderBehavior = behavior;
 
-	renderBuffer->renderBehavior.shader = shader;
-
-	/* allocate renderattributeptr to heap */
-	renderBuffer->renderBehavior.renderAttributeSizeBytes = renderAttributeSize;
-	renderBuffer->renderBehavior.renderAttributePtr = 
-		vAllocZeroed(max(renderAttributeSize, RENDERATTRIBUTE_SIZE_MIN));
-
-	/* initialize renderattribute block */
-	if (renderBuffer->renderBehavior.renderAttributeSetup != NULL)
-	{
-		renderBuffer->renderBehavior.renderAttributeSetup(&renderBuffer->renderBehavior,
-			renderBuffer->renderBehavior.renderAttributePtr);
-	}
-	
-	/* setup rendermethod */
-	if (renderMethod != NULL)
-	{
-		renderBuffer->renderBehavior.renderMethod = renderMethod;
-	}
-	else
-	{
-		vLogWarning(__func__, "Created RenderBuffer with NULL render method.");
-	}
-	
-	renderBuffer->renderBehavior.objectAttributeSizeBytes = objectAttributeSize;
-	
 	/* format object buffer name */
 	vCHAR bufferName[BUFF_MEDIUM];
-	sprintf_s(bufferName, BUFF_MEDIUM, "Render Object Buffer %P", renderBuffer);
+	sprintf_s(bufferName, BUFF_MEDIUM, "Render Object Buffer %p", renderBuffer);
 
 	/* initialize object buffer */
 	renderBuffer->objectBuffer = vCreateBuffer(bufferName, sizeof(vRenderObject) +
-		objectAttributeSize, capacity);
+		renderBuffer->renderBehavior->objectAttributeSizeBytes, capacity);
+
+	vGFXUnlock();
 
 	return renderBuffer;
 }
 
 VGFXAPI void vGFXDestroyRenderBuffer(vPRenderBuffer renderBuffer)
 {
-	/* free render attribute block */
-	vFree(renderBuffer->renderBehavior.renderAttributePtr);
+	vGFXLock();
 
 	/* free associated buffer */
 	vDestroyBuffer(renderBuffer->objectBuffer);
 
 	/* remove from render buffers */
 	vBufferRemove(_vgfx.renderBuffers, renderBuffer);
+
+	vGFXUnlock();
 }
 
 VGFXAPI void vGFXRenderBufferGetInfo(vPRenderBuffer renderBuffer, vPBufferInfo infoOut)

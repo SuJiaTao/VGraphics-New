@@ -29,6 +29,8 @@ VGFXAPI vBOOL vGFXInitialize(void)
 		sizeof(vRenderBuffer), RENDER_BUFFERS_MAX);
 	_vgfx.textureBuffer = vCreateBuffer("VGFX Texture Object Buffer",
 		sizeof(vTexture), TEXTURE_OBJECTS_MAX);
+	_vgfx.renderBehaviorBuffer = vCreateBuffer("VGFX Render Behavior Buffer",
+		sizeof(vRenderBehavior), RENDER_BEHAVIORS_MAX);
 	_vgfx.jobBuffer.jobBufferLock = vCreateLock();
 	vGFXCameraResetAll();
 

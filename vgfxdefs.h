@@ -23,8 +23,10 @@
 
 
 /* ========== MAGIC NUMBERS						==========	*/
+#define RENDER_BEHAVIORS_MAX		0x40
 #define RENDER_BUFFERS_MAX			0x100
 #define TEXTURE_OBJECTS_MAX			0x200
+#define DEFAULT_RENDER_BUFFER_SIZE	0x010
 #define VGFX_TERMINATE_TRYTIME_MSEC	0x400
 #define VGFX_TERMINATE_TRIES_MAX	0xA
 
@@ -52,8 +54,9 @@
 /* ========== TYPE DEFS							==========	*/
 typedef void (*vGFXPFRenderJob)(vPTR data);
 typedef void (*vGFXPFRenderAttributeSetup)(struct vRenderBehavior* behavior, vPTR renderAttribute);
-typedef void (*vGFXPFRenderMethod)(vPTR renderAttribute, struct vRenderObject* object,
-	float projectionMatrix[0x10], float modelMatrix[0x10], float textureMatrix[0x10]);
+typedef void (*vGFXPFRenderMethod)(vPTR renderAttribute, vPTR objectAttribute,
+	struct vRenderObject* object, GLfloat projectionMatrix[0x10], GLfloat modelMatrix[0x10], 
+	GLfloat textureMatrix[0x10]);
 
 /* ========== STRUCTURES						==========	*/
 typedef struct v2V
@@ -133,8 +136,8 @@ typedef struct vRenderObject
 
 typedef struct vRenderBuffer
 {
-	vRenderBehavior renderBehavior;	/* how to draw each object	*/
-	vHNDL objectBuffer;				/* object buffer			*/
+	vPRenderBehavior renderBehavior;	/* how to draw each object	*/
+	vHNDL objectBuffer;					/* object buffer			*/
 } vRenderBuffer, *vPRenderBuffer;
 
 typedef struct vRenderJob
@@ -154,6 +157,13 @@ typedef struct vRenderJobBuffer
 	vUI32	   jobStartIndex;			/* circular array head index				*/
 } vRenderJobBuffer, *vPRenderJobBuffer;
 
+typedef struct vDefaultRenderAttribute
+{
+	GLuint* shaderProgram;			/* ptr to shader prog hndl			*/
+	GLuint  vertexAttributes;		/* VAO object						*/
+	GLuint  renderObjectBaseRect;	/* base rect and UV					*/
+} vDefaultRenderAttribute, *vPDefaultRenderAttribute;
+
 typedef struct _vGFXInternals
 {
 	vBOOL initialized;
@@ -172,22 +182,24 @@ typedef struct _vGFXInternals
 
 	vUI64 renderFrameCount;	/* increments with every frame rendered		*/
 
-	vPRenderObject frameObject;
+	GLuint defaultShader;			/* default shader program			*/
+	vPRenderBuffer defaultRenderBuffer;	/* default RenderBuffer			*/
+	
+	GLuint  framebuffer;			/* framebuffer to render to			*/
+	GLuint  framebufferTexture;		/* framebuffer texture object		*/
+	GLuint  framebufferDepth;		/* framebuffer depth componenet		*/
+	vPRenderObject frameObject;		/* framebuffer render object		*/
 
-	GLuint shaderProgram;
-	GLuint vertexAttributes;		/* VAO object */
-
-	GLuint framebuffer;				/* framebuffer to render to			*/
-	GLuint framebufferTexture;		/* framebuffer texture object		*/
-	GLuint framebufferDepth;		/* framebuffer depth componenet		*/
 	vTransform2 cameraTransform;	/* camera transform					*/
 
-	vHNDL textureBuffer;			/* buffer that holds all textures	*/
+	/* buffer that holds all textures									*/
+	vHNDL textureBuffer;			
+
+	/* buffer that holds all render behaviors							*/
+	vHNDL renderBehaviorBuffer;
 
 	/* buffer of buffers that hold render objects.						*/
-	vHNDL  renderBuffers;
-
-	GLuint renderObjectBaseRect;	/* base rect and UV					*/
+	vHNDL renderBuffers;
 
 	vRenderJobBuffer jobBuffer;		/* jobs to execute per render cycle */
 } _vGFXInternals, *_vPGFXInternals;

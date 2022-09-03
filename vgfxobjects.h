@@ -19,12 +19,18 @@ VGFXAPI vT2 vGFXCreateTransformF(float x, float y, float r, float s);
 VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s);
 
 
-/* ========== RENDER BUFFERS					==========	*/
-VGFXAPI vPRenderBuffer vGFXCreateRenderBuffer(GLuint shader, vGFXPFRenderMethod renderMethod,
+/* ========== RENDER BEHAVIORS					==========	*/
+VGFXAPI vPRenderBehavior vGFXCreateRenderBehavior(GLuint shader, vGFXPFRenderMethod renderMethod,
 	vUI32 renderAttributeSize, vGFXPFRenderAttributeSetup renderAttributeSetup,
-	vUI32 objectAttributeSize, vUI16 capacity);
+	vUI32 objectAttributeSize);
+VGFXAPI void vGFXDestroyRenderBehavior(vPRenderBehavior behavior);
+
+
+/* ========== RENDER BUFFERS					==========	*/
+VGFXAPI vPRenderBuffer vGFXCreateRenderBuffer(vPRenderBehavior behavior, vUI16 capacity);
 VGFXAPI void vGFXDestroyRenderBuffer(vPRenderBuffer renderBuffer);
 VGFXAPI void vGFXRenderBufferGetInfo(vPRenderBuffer renderBuffer, vPBufferInfo infoOut);
+
 
 /* ========== RENDER OBJECTS					==========	*/
 VGFXAPI vPRenderObject vGFXCreateRenderObject(vPRenderBuffer buff, vRect rect,

@@ -15,7 +15,7 @@ static void vhDrawRenderObjectCallback(vPRenderBuffer buffer, vUI16 index, vPRen
 	/* check if to skip render */
 	if (element->render == FALSE) return;
 
-	vGFXDrawRenderObject(element);
+	vGFXDrawRenderObject(buffer, element);
 }
 
 
@@ -23,16 +23,7 @@ static void vhDrawRenderObjectCallback(vPRenderBuffer buffer, vUI16 index, vPRen
 VGFXAPI void vGFXDrawRenderObject(vPRenderBuffer buffer, vPRenderObject object)
 {
 	/* switch to using object's associated shader */
-	glUseProgram(buffer->renderBehavior.shader);
-
-	/* bind to default vertex buffer */
-	glBindBuffer(GL_ARRAY_BUFFER, _vgfx.renderObjectBaseRect);
-
-	/* */
-
-	/* call shader setup */
-	vPBYTE objectAttributePtr = (vPBYTE)object + sizeof(vRenderObject);
-	buffer->renderBehavior.shaderSetupFunc(objectAttributePtr, object);
+	glUseProgram(buffer->renderBehavior->shader);
 
 	/* apply transformations */
 	glMatrixMode(GL_MODELVIEW);
@@ -59,20 +50,14 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderBuffer buffer, vPRenderObject object)
 	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
 	glGetFloatv(GL_MODELVIEW_MATRIX , modelMatrix);
 	glGetFloatv(GL_TEXTURE_MATRIX   , textureMatrix);
-	
-	glUniform4fv(1, 1, &object->tint);
-	glUniformMatrix4fv(2, 1, GL_FALSE, projectionMatrix);
-	glUniformMatrix4fv(3, 1, GL_FALSE, modelMatrix);
-	glUniformMatrix4fv(4, 1, GL_FALSE, textureMatrix);
 
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
+	/* bind to framebuffer */
+	glBindFramebuffer(GL_FRAMEBUFFER, _vgfx.framebuffer);
 
-	glBindTexture(GL_TEXTURE_2D, object->texture->glHandle);
-	glDrawArrays(GL_QUADS, 0, 4);
-
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_DEPTH_TEST);
+	/* call render method */
+	vPBYTE objectAttributePtr = (vPBYTE)object + sizeof(vRenderObject);
+	buffer->renderBehavior->renderMethod(buffer->renderBehavior->renderAttributePtr,
+		objectAttributePtr, object, projectionMatrix, modelMatrix, textureMatrix);
 }
 
 VGFXAPI void vGFXDrawRenderObjects(void)

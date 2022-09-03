@@ -50,9 +50,9 @@ static __forceinline void vhInitializeShaderProgram(void)
 	vLogInfo(__func__, "Fragment shader compiled sucessfully.");
 
 	/* create shader program and use */
-	_vgfx.shaderProgram = vGFXCreateShaderProgram(vertexShader, fragmentShader);
-	if (_vgfx.shaderProgram == ZERO) { vCoreFatalError(__func__, "Could not create shader program."); }
-	glUseProgram(_vgfx.shaderProgram);
+	_vgfx.defaultShader = vGFXCreateShaderProgram(vertexShader, fragmentShader);
+	if (_vgfx.defaultShader == ZERO) { vCoreFatalError(__func__, "Could not create shader program."); }
+	glUseProgram(_vgfx.defaultShader);
 
 	vLogInfo(__func__, "Shaders initialized sucessfully.");
 	vDumpEntryBuffer();
@@ -260,17 +260,107 @@ static __forceinline vhExecuteRenderJobs(void)
 
 static __forceinline vhRenderFrame(void)
 {
+	/* bind to default framebuffer and clear */
 	glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
 	glClearColor(VGFX_FAILEDRENDER_COLOR);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+	/* clear all */
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
 	glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
 	glViewport(0, 0, _vgfx.renderClientWidth, _vgfx.renderClientHeight);
 	
-	vGFXDrawRenderObject(_vgfx.frameObject);
+	vGFXDrawRenderObject(_vgfx.defaultRenderBuffer, _vgfx.frameObject);
+}
+
+static void vhDefaultRenderAttributeSetup(vPRenderBehavior behavior,
+	vPDefaultRenderAttribute attribute)
+{
+	/* setup shader pointer */
+	attribute->shaderProgram = &_vgfx.defaultShader;
+
+	/* initialize framebuffer */
+	vhInitializeFramebuffer(attribute);
+
+	/* generate VAO to store vertex attribute descriptors */
+	glGenVertexArrays(1, &attribute->vertexAttributes);
+	glBindVertexArray(attribute->vertexAttributes);
+
+	if (attribute->vertexAttributes == ZERO)
+	{
+		vLogError(__func__, "Could not create vertex array object.");
+		vCoreFatalError(__func__, "Failed to create vertex array object.");
+	}
+
+	/* generate base rect for render objects (normalized square) */
+	float baseRect[4][2] = { { -1, -1 }, { -1, 1 }, { 1, 1 }, { 1, -1} };
+
+	glGenBuffers(1, &attribute->renderObjectBaseRect);
+	glBindBuffer(GL_ARRAY_BUFFER, attribute->renderObjectBaseRect);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(baseRect), baseRect, GL_STATIC_DRAW);
+
+	if (attribute->renderObjectBaseRect == ZERO)
+	{
+		vLogError(__func__, "Could not create vertex buffer object.");
+		vCoreFatalError(__func__, "Failed to create vertex buffer object.");
+	}
+
+	/* setup vertex attributes */
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+}
+
+static void vhDefaultRenderMethod(vPDefaultRenderAttribute renderAttribute,
+	vPTR objectAttribute, vPRenderObject object, GLfloat projectionMatrix[0x10],
+	GLfloat modelMatrix[0x10], GLfloat textureMatrix[0x10])
+{
+	/* if object is frame object, draw to default framebuffer */
+	if (object == _vgfx.frameObject)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
+	}
+
+	/* bind to shader program */
+	glUseProgram(*renderAttribute->shaderProgram);
+
+	/* bind to vertex buffer and array */
+	glBindBuffer(GL_ARRAY_BUFFER, renderAttribute->renderObjectBaseRect);
+	glBindVertexArray(renderAttribute->vertexAttributes);
+
+	/* setup unfiform values */
+	glUniform4fv(1, 1, &object->tint);
+	glUniformMatrix4fv(2, 1, GL_FALSE, projectionMatrix);
+	glUniformMatrix4fv(3, 1, GL_FALSE, modelMatrix);
+	glUniformMatrix4fv(4, 1, GL_FALSE, textureMatrix);
+
+	/* draw rects */
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
+
+	glBindTexture(GL_TEXTURE_2D, object->texture->glHandle);
+	glDrawArrays(GL_QUADS, 0, 4);
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_DEPTH_TEST);
+}
+
+static void vhInitializeDefaultRenderBuffer(void)
+{
+	/* create default render buffer */
+	_vgfx.defaultRenderBuffer = vGFXCreateRenderBuffer(_vgfx.defaultShader,
+		vhDefaultRenderMethod, sizeof(vDefaultRenderAttribute), vhDefaultRenderAttributeSetup,
+		ZERO, DEFAULT_RENDER_BUFFER_SIZE);
+
+	/* create frame object */
+	_vgfx.frameObject = vGFXCreateRenderObject(_vgfx.defaultRenderBuffer,
+		vGFXCreateRect(VGFX_ASPECT_RATIO, 1.0f), NULL);
+	_vgfx.frameObject->render  = FALSE; /* make invisible */
+	_vgfx.frameObject->texture = vBufferAdd(_vgfx.textureBuffer);
+	
+	/* set texture to framebuffer texture */
+	_vgfx.frameObject->texture->glHandle = _vgfx.framebufferTexture;
 }
 
 /* ========== RENDER THREAD ENTRY POINT			==========	*/
@@ -284,9 +374,6 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	/* initialize render window */
 	vhInitializeRenderWindow();
 
-	/* initialize framebuffer */
-	vhInitializeFramebuffer();
-
 	/* load, compile and use shaders */
 	vhInitializeShaderProgram();
 
@@ -297,12 +384,6 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	ULONGLONG currentRenderTimeMsec = 0;
 	ULONGLONG lastRenderTimeMsec    = 0;
 	ULONGLONG nextRenderTimeMsec    = 0;
-
-	/* create frame object */
-	_vgfx.frameObject = vGFXCreateRenderObject(vGFXCreateRect(VGFX_ASPECT_RATIO, 1.0f), NULL);
-	_vgfx.frameObject->render  = FALSE; /* make invisible */
-	_vgfx.frameObject->texture = vBufferAdd(_vgfx.textureBuffer);
-	_vgfx.frameObject->texture->glHandle = _vgfx.framebufferTexture;
 
 	vLogInfo(__func__, "VGFX Starting render loop.");
 	vDumpEntryBuffer(); /* dump in case of crash */
