@@ -72,7 +72,7 @@ VGFXAPI void vGFXDrawRenderObject(vPRenderBuffer buffer, vPRenderObject object)
 		objectAttributePtr, object, projectionMatrix, modelMatrix, textureMatrix);
 }
 
-VGFXAPI void vGFXDrawRenderObjects(void)
+VGFXAPI void vGFXDrawRenderObjects(vPRenderBuffer buffer)
 {
-	vBufferIterate(_vgfx.renderBuffers, vhDrawRenderObjectCallback);
+	vBufferIterate(buffer->objectBuffer, vhDrawRenderObjectCallback);
 }

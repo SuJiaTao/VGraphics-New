@@ -377,7 +377,9 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	_vgfx.frameObject = vGFXCreateRenderObject(_vgfx.frameObjectBuffer,
 		vGFXCreateRect(VGFX_ASPECT_RATIO, 1.0f), NULL);
 	_vgfx.frameObject->render = FALSE;	/* require manual rendering	*/
-	_vgfx.frameObject->texture = _vgfx.framebufferTexture;
+	_vgfx.frameObject->texture = vGFXCreateTexture(VGFX_RESOLUTION_WIDTH,
+		VGFX_RESOLUTION_HEIGHT, NULL);
+	_vgfx.frameObject->texture->glHandle = _vgfx.framebufferTexture;
 
 	/* render time related variables */
 	ULONGLONG currentRenderTimeMsec = 0;

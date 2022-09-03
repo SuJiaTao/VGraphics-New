@@ -58,6 +58,11 @@ VGFXAPI vT2 vGFXCreateTransformV(v2V position, float r, float s)
 }
 
 /* ========== RENDER BEHAVIORS					==========	*/
+VGFXAPI vPRenderBehavior vGFXGetDefaultRenderBehavior(void)
+{
+	return _vgfx.defaultRenderBehavior;
+}
+
 VGFXAPI vPRenderBehavior vGFXCreateRenderBehavior(GLuint shader, vGFXPFRenderMethod renderMethod,
 	vUI32 renderAttributeSize, vGFXPFRenderAttributeSetup renderAttributeSetup,
 	vUI32 objectAttributeSize)
