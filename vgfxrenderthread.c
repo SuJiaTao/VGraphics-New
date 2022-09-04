@@ -312,20 +312,16 @@ static void vhDefaultRenderMethod(vPDefaultRenderAttribute renderAttribute,
 	/* if object is frame object, setup projection and draw to default framebuffer */
 	if (object == _vgfx.frameObject)
 	{
-		/* clear all matricies */
-		glMatrixMode(GL_PROJECTION); glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);	 glLoadIdentity();
-		glMatrixMode(GL_TEXTURE);	 glLoadIdentity();
-
 		/* setup projection */
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+
 		glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
 		glViewport(0, 0, _vgfx.renderClientWidth, _vgfx.renderClientHeight);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
-
 		glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
-		glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
-		glGetFloatv(GL_TEXTURE_MATRIX, textureMatrix);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
 	}
 
 	/* bind to shader program */
@@ -387,6 +383,7 @@ VGFXAPI void vGFXRenderThreadProcess(void* input)
 	_vgfx.frameObject = vGFXCreateRenderObject(_vgfx.frameObjectBuffer,
 		vGFXCreateRect(VGFX_ASPECT_RATIO, 1.0f), NULL);
 	_vgfx.frameObject->render = FALSE;	/* require manual rendering	*/
+	_vgfx.frameObject->rectangle = vGFXCreateRect(VGFX_ASPECT_RATIO, 1.0f);
 	_vgfx.frameObject->texture = vGFXCreateTexture(VGFX_RESOLUTION_WIDTH,
 		VGFX_RESOLUTION_HEIGHT, NULL);
 	_vgfx.frameObject->texture->glHandle = _vgfx.framebufferTexture;
