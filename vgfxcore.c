@@ -166,6 +166,11 @@ VGFXAPI vBOOL vGFXIsWindowClosed(void)
 	return _vgfx.windowClosed;
 }
 
+VGFXAPI vUI64 vGFXGetFrameCount(void)
+{
+	return _vgfx.renderFrameCount;
+}
+
 VGFXAPI _vPGFXInternals vGFXGetInternals(void)
 {
 	return &_vgfx;

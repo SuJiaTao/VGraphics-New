@@ -40,6 +40,7 @@ VGFXAPI void vGFXCameraGetTransform(vPT2 oTransform);
 
 /* ========== INFORMATION POLLING				==========	*/
 VGFXAPI vBOOL vGFXIsWindowClosed(void);
+VGFXAPI vUI64 vGFXGetFrameCount(void);
 VGFXAPI _vPGFXInternals vGFXGetInternals(void);
 
 #endif
