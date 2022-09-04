@@ -20,15 +20,11 @@ VGFXAPI vBOOL vGFXLoadShader(vPCHAR buffer, vUI32 bufferSize,
 
 
 /* ========== SHADER COMPILING					==========	*/
-VGFXAPI GLuint vGFXCompileShader(GLenum shaderType, PCHAR source);
+VGFXAPI GLuint vGFXCompileShader(vUI32 VGFXshaderType, PCHAR source);
 
 
 /* ========== SHADER PROGRAM CREATION			==========	*/
 VGFXAPI GLuint vGFXCreateShaderProgram(GLuint vertex, GLuint frag);
-
-
-/* ========== SHADER VERTEX ATTRIBUTE SETUP		==========	*/
-VGFXAPI void vGFXSetupShaderVertexAttributes(void);
 
 
 #endif

@@ -71,7 +71,9 @@ VGFXAPI vPRenderBehavior vGFXCreateRenderBehavior(GLuint shader, vGFXPFRenderMet
 
 	/* create object */
 	vPRenderBehavior bhv = vBufferAdd(_vgfx.renderBehaviorBuffer);
-	
+	vLogInfoFormatted(__func__, "Creating render behavior %02X",
+		vBufferGetElementIndex(_vgfx.renderBehaviorBuffer, bhv));
+
 	/* setup members */
 	bhv->shader = shader;
 	bhv->renderMethod = renderMethod;
@@ -99,6 +101,9 @@ VGFXAPI void vGFXDestroyRenderBehavior(vPRenderBehavior behavior)
 {
 	vGFXLock();
 
+	vLogInfoFormatted(__func__, "Destroying render behavior %02X.",
+		vBufferGetElementIndex(_vgfx.renderBehaviorBuffer, behavior));
+
 	/* free block and remove from buffer */
 	vFree(behavior->renderAttributePtr);
 	vBufferRemove(_vgfx.renderBehaviorBuffer, behavior);
@@ -118,7 +123,8 @@ VGFXAPI vPRenderBuffer vGFXCreateRenderBuffer(vPRenderBehavior behavior, vUI16 c
 
 	/* format object buffer name */
 	vCHAR bufferName[BUFF_MEDIUM];
-	sprintf_s(bufferName, BUFF_MEDIUM, "Render Object Buffer %p", renderBuffer);
+	sprintf_s(bufferName, BUFF_MEDIUM, "Render Object Buffer %02X",
+		vBufferGetElementIndex(_vgfx.renderBuffers, renderBuffer));
 
 	/* initialize object buffer */
 	renderBuffer->objectBuffer = vCreateBuffer(bufferName, sizeof(vRenderObject) +

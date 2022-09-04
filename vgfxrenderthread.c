@@ -36,7 +36,7 @@ static __forceinline void vhCreateDefaultShader(void)
 	vLogInfo(__func__, "Compiling vertex shader.");
 
 	/* compile vertex shader */
-	vertexShader = vGFXCompileShader(GL_VERTEX_SHADER, vGFXGetVertexShaderSource());
+	vertexShader = vGFXCompileShader(VGFX_VERTEX_SHADER, vGFXGetVertexShaderSource());
 	if (vertexShader == ZERO) { vCoreFatalError(__func__, "Vertex shader could not be compiled."); }
 
 	vLogInfo(__func__, "Vertex shader compiled sucessfully.");
@@ -44,7 +44,7 @@ static __forceinline void vhCreateDefaultShader(void)
 	vLogInfo(__func__, "Compiling fragment shader.");
 
 	/* compile fragment shader */
-	fragmentShader = vGFXCompileShader(GL_FRAGMENT_SHADER, vGFXGetFragmentShaderSource());
+	fragmentShader = vGFXCompileShader(VGFX_FRAGMENT_SHADER, vGFXGetFragmentShaderSource());
 	if (fragmentShader == ZERO) { vCoreFatalError(__func__, "Fragment shader could not be compiled."); }
 
 	vLogInfo(__func__, "Fragment shader compiled sucessfully.");
@@ -312,10 +312,20 @@ static void vhDefaultRenderMethod(vPDefaultRenderAttribute renderAttribute,
 	/* if object is frame object, setup projection and draw to default framebuffer */
 	if (object == _vgfx.frameObject)
 	{
+		/* clear all matricies */
+		glMatrixMode(GL_PROJECTION); glLoadIdentity();
+		glMatrixMode(GL_MODELVIEW);	 glLoadIdentity();
+		glMatrixMode(GL_TEXTURE);	 glLoadIdentity();
+
+		/* setup projection */
 		glOrtho(-VGFX_ASPECT_RATIO, VGFX_ASPECT_RATIO, -1, 1, -1, 1);
 		glViewport(0, 0, _vgfx.renderClientWidth, _vgfx.renderClientHeight);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, ZERO);
+
+		glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
+		glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
+		glGetFloatv(GL_TEXTURE_MATRIX, textureMatrix);
 	}
 
 	/* bind to shader program */

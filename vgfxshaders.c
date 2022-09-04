@@ -115,11 +115,22 @@ VGFXAPI vBOOL vGFXLoadShader(vPCHAR buffer, vUI32 bufferSize,
 
 
 /* ========== SHADER COMPILING					==========	*/
-VGFXAPI GLuint vGFXCompileShader(GLenum shaderType, PCHAR source)
+VGFXAPI GLuint vGFXCompileShader(vUI32 VGFXshaderType, PCHAR source)
 {
 	vLogInfo(__func__, "Compiling shader.");
 
-	GLuint shaderID;
+	GLuint shaderID	  = ZERO;
+	GLenum shaderType = ZERO;
+	if (VGFXshaderType == VGFX_VERTEX_SHADER)
+	{
+		shaderType = GL_VERTEX_SHADER;
+	}
+	if (VGFXshaderType == VGFX_FRAGMENT_SHADER)
+	{
+		shaderType = GL_FRAGMENT_SHADER;
+	}
+
+	if (shaderType == ZERO) vLogError(__func__, "Invalid shader type specified.");
 
 	/* compile shader */
 	shaderID = glCreateShader(shaderType);
