@@ -20,19 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vgfx.h" />
-    <ClInclude Include="vgfxcore.h" />
-    <ClInclude Include="vgfxdefs.h" />
-    <ClInclude Include="vgfxdrawobject.h" />
-    <ClInclude Include="vgfxrenderthread.h" />
-    <ClInclude Include="vgfxshaders.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="vgfxcore.c" />
-    <ClCompile Include="vgfxdrawobject.c" />
-    <ClCompile Include="vgfxobjects.c" />
-    <ClCompile Include="vgfxobjects.h" />
-    <ClCompile Include="vgfxrenderthread.c" />
-    <ClCompile Include="vgfxshaders.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

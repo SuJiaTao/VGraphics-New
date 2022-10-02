@@ -13,63 +13,10 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Core">
-      <UniqueIdentifier>{b6614e92-8361-4088-b082-68722c3f2d52}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Render Logic">
-      <UniqueIdentifier>{0d7761b1-8ea6-406d-992a-8698e655b35d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Core">
-      <UniqueIdentifier>{ce30473b-e363-442c-8b13-4e0d31a655a7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Render Logic">
-      <UniqueIdentifier>{8b6db96d-1038-4051-bdd8-e668e7322da4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Object Manipulation">
-      <UniqueIdentifier>{d71a477f-21e0-4a0f-94c2-e046138dce52}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Object Manipulation">
-      <UniqueIdentifier>{77e1d444-f43e-4b01-b9f0-0f5c0b1196dc}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="vgfxdefs.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
     <ClInclude Include="vgfx.h">
-      <Filter>Header Files\Core</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vgfxcore.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="vgfxrenderthread.h">
-      <Filter>Header Files\Render Logic</Filter>
-    </ClInclude>
-    <ClInclude Include="vgfxshaders.h">
-      <Filter>Header Files\Render Logic</Filter>
-    </ClInclude>
-    <ClInclude Include="vgfxdrawobject.h">
-      <Filter>Header Files\Render Logic</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="vgfxcore.c">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="vgfxrenderthread.c">
-      <Filter>Source Files\Render Logic</Filter>
-    </ClCompile>
-    <ClCompile Include="vgfxshaders.c">
-      <Filter>Source Files\Render Logic</Filter>
-    </ClCompile>
-    <ClCompile Include="vgfxdrawobject.c">
-      <Filter>Source Files\Render Logic</Filter>
-    </ClCompile>
-    <ClCompile Include="vgfxobjects.h">
-      <Filter>Header Files\Object Manipulation</Filter>
-    </ClCompile>
-    <ClCompile Include="vgfxobjects.c">
-      <Filter>Source Files\Object Manipulation</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
