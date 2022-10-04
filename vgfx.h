@@ -6,4 +6,9 @@
 #ifndef _VGFX_INCLUDE_
 #define _VGFX_INCLUDE_
 
+/* ========== INCLUDES							==========	*/
+#include "vcore.h"				/* core functions			*/
+#include "vgfxdefs.h"			/* types, structs and defs	*/
+
+
 #endif

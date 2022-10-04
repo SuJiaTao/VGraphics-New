@@ -18,5 +18,8 @@
     <ClInclude Include="vgfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vgfxdefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
