@@ -20,7 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vgfx.h" />
+    <ClInclude Include="vgfxcore.h" />
     <ClInclude Include="vgfxdefs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="vgfxcore.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

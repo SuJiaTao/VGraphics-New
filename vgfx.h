@@ -9,6 +9,7 @@
 /* ========== INCLUDES							==========	*/
 #include "vcore.h"				/* core functions			*/
 #include "vgfxdefs.h"			/* types, structs and defs	*/
+#include "vgfxcore.h"			/* core gfx functions		*/
 
 
 #endif
