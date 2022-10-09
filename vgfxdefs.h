@@ -97,9 +97,10 @@ typedef struct vGWindow
 /* ========== INITIALIZATION PARAMETERS			==========	*/
 typedef struct vGInitializeData
 {
-	vUI32 windowWidth;
-	vUI32 windowHeight;
-	vUI32 targetFrameRate;
+	vPCHAR windowName;
+	vUI32  windowWidth;
+	vUI32  windowHeight;
+	vUI32  targetFrameRate;
 } vGInitializeData, *vPGInitializeData;
 
 

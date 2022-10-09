@@ -22,7 +22,7 @@ static void vGRenderableList_initFunc(vHNDL buffer, vPGRenderable* element,
 
 
 /* ========== INITIALIZATION					==========	*/
-vBOOL vGInitialize(vPGInitializeData initializationData)
+VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 {
 	vLogInfo(__func__, "Initializing vGFX.");
 
@@ -46,4 +46,16 @@ vBOOL vGInitialize(vPGInitializeData initializationData)
 	/* create renderable behavior */
 	_vgfx.renderableHandle = vCreateComponent("vGFX Renderable", ZERO, sizeof(vPGRenderable),
 		NULL, vGRenderable_initFunc, vGRenderable_destroyFunc, NULL, _vgfx.workerThread);
+}
+
+
+/* ========== SYNCHRONIZATION					==========	*/
+VGFXAPI void vGLock(void)
+{
+	EnterCriticalSection(&_vgfx.lock);
+}
+
+VGFXAPI void vGUnlock(void)
+{
+	LeaveCriticalSection(&_vgfx.lock)
 }

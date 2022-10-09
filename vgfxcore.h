@@ -11,6 +11,11 @@
 
 
 /* ========== INITIALIZATION					==========	*/
-vBOOL vGInitialize(vPGInitializeData initializationData);
+VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData);
+
+
+/* ========== SYNCHRONIZATION					==========	*/
+VGFXAPI void vGLock(void);
+VGFXAPI void vGUnlock(void);
 
 #endif
