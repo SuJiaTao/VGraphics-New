@@ -19,6 +19,12 @@
 #endif
 
 
+/* ========== MAGIC NUMBERS						==========	*/
+#define SKINS_MAX					0x400
+#define SHADERS_MAX					0x040
+#define RENDERABLE_LIST_NODE_SIZE	0x200
+
+
 /* ========== TYPEDEFS							==========	*/
 typedef void (*vPFGSHADERINIT)(struct vGShader* shader, vPTR shaderData, vPTR input);
 typedef void (*vPFGSHADERRENDER)(struct vGShader* shader, vPTR shaderData, 
@@ -66,6 +72,8 @@ typedef struct vGShader
 
 typedef struct vGRenderable
 {
+	vPTR internalStoredPtr;
+
 	vPGShader shader;
 
 	vPGSkin skin;
@@ -89,16 +97,22 @@ typedef struct vGWindow
 /* ========== INITIALIZATION PARAMETERS			==========	*/
 typedef struct vGInitializeData
 {
-	vUI32 window_width;
-	vUI32 window_height;
+	vUI32 windowWidth;
+	vUI32 windowHeight;
+	vUI32 targetFrameRate;
 } vGInitializeData, *vPGInitializeData;
 
 
 /* ========== MODULE INTERNALS					==========	*/
 typedef struct _vGInternals
 {
+	CRITICAL_SECTION lock;
+
 	vPWorker workerThread;		/* graphics thread		*/
+	vUI32    targetFrameRate;
 	vGWindow window;			/* render window		*/
+
+	vUI16 renderableHandle;
 
 	vHNDL shaderList;			/* static list of all shaders */
 	vHNDL skinList;				/* static list of all skins	  */

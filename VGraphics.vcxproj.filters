@@ -19,6 +19,12 @@
     <Filter Include="Resource Files\Core">
       <UniqueIdentifier>{5cb0c507-b31a-4656-8704-f0f80f91f745}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Internal">
+      <UniqueIdentifier>{2dd4ff40-3f35-4991-ac3d-61684205d74f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Internal">
+      <UniqueIdentifier>{7ef35f35-d33b-4c9f-862c-cd97fd9a1ae7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vgfx.h">
@@ -30,10 +36,22 @@
     <ClInclude Include="vgfxcore.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="vgfxthread.h">
+      <Filter>Header Files\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="vgfxrenderable.h">
+      <Filter>Header Files\Internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vgfxcore.c">
       <Filter>Resource Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="vgfxthread.c">
+      <Filter>Resource Files\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="vgfxrenderable.c">
+      <Filter>Resource Files\Internal</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
