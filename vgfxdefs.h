@@ -22,47 +22,29 @@
 /* ========== TYPEDEFS							==========	*/
 typedef void (*vPFGSHADERINIT)(struct vGShader* shader, vPTR shaderData, vPTR input);
 typedef void (*vPFGSHADERRENDER)(struct vGShader* shader, vPTR shaderData, 
-	struct vObject* object, struct vGMaterial* objectMaterial);
-
-
-/* ========== SHADER OBJECT						==========	*/
-typedef struct vGShader
-{
-	GLuint glHandle;	/* handle to openGL shader object */
-
-	vPTR   shaderPersistentData;			/* persistent heap data	*/
-	vUI64  shaderPersistentDataSizeBytes;	/* size of heap data	*/
-
-	vPFGSHADERINIT   initFunc;		/* initialization function		*/
-	vPFGSHADERRENDER renderFunc;	/* render function				*/
-} vGShader, *vPGShader;
+	struct vObject* object, struct vGRenderable* renderData);
 
 
 /* ========== MATERIAL AND RELATED				==========	*/
-typedef struct vGQuad
+typedef struct vGSkin
 {
-	GLuint glHandle;	/* handle to GL object */
-	const vPosition bottomLeft;
-	const vPosition topLeft;
-	const vPosition bottomRight;
-	const vPosition topRight;
-} vGQuad, *vPGQuad;
+	GLuint glHandle;
 
-typedef struct vGTexture
+	vUI16  width;
+	vUI16  height;
+	vUI8 skinCount;
+
+	vUI8 skinWidth;
+	vUI8  skinHeight;
+} vGSkin, *vPGSkin;
+
+typedef struct vGRect
 {
-	GLuint glHandle;	/* handle to GL object */
-	
-	vUI32 width;
-	vUI32 height;
-
-	vBOOL linearFilter : 1;
-	vBOOL wrap		   : 1;
-
-	/* skin system */
-	vUI16 skinCount;
-	vUI16 skinWidth;
-	vUI16 skinHeight;
-} vGTexture, *vPGTexture;
+	float bottomLeft;
+	float bottomRight;
+	float topLeft;
+	float topRight;
+} vGRect, *vPGRect;
 
 typedef struct vGColor
 {
@@ -72,18 +54,27 @@ typedef struct vGColor
 	float A;
 } vGColor, *vPGColor;
 
-typedef struct vGMaterial
+typedef struct vGShader
 {
-	vPGShader shader;	/* shader to use to render	*/
+	GLuint glProgramHandle;
 
-	vPGTexture texturePrimary;
-	vPGTexture textureSecondary;
+	vUI32  shaderDataSizeBytes;
+	vPTR   shaderDataPtr;
 
-	vPGQuad meshQuad;
-	vPGQuad uvQuad;
+	vPFGSHADERRENDER renderFunc;
+} vGShader, *vPGShader;
+
+typedef struct vGRenderable
+{
+	vPGShader shader;
+
+	vPGSkin skin;
+	vUI16   renderSkin;
 
 	vGColor tint;
-} vGMaterial, *vPGMaterial;
+	vGRect  rect;
+} vGRenderable, *vPGRenderable;
+
 
 /* ========== WINDOW STATE						==========	*/
 typedef struct vGWindow
@@ -92,8 +83,8 @@ typedef struct vGWindow
 	HDC   deviceContext;
 	HGLRC renderingContext;
 	RECT  dimensions;
-	float aspectRatio;
 } vGWindow, *vPGWindow;
+
 
 /* ========== INITIALIZATION PARAMETERS			==========	*/
 typedef struct vGInitializeData
@@ -102,52 +93,20 @@ typedef struct vGInitializeData
 	vUI32 window_height;
 } vGInitializeData, *vPGInitializeData;
 
+
 /* ========== MODULE INTERNALS					==========	*/
-typedef struct vGDefaultShaders
-{
-	vPGShader shader_missing;
-	vPGShader shader_rectangle;
-	vPGShader shader_wobble;
-} vGDefaultShaders, *vPGDefaultShaders;
-
-typedef struct vGDefaultTextures
-{
-	vPGTexture texture_missing;
-	vPGTexture texture_gradient;
-	vPGTexture texture_devGray;
-	vPGTexture texture_devOrange;
-} vGDefaultTextures, *vPGDefaultTextures;
-
-typedef struct vGDefaultQuads
-{
-	vPGQuad quad_normalized;
-	vPGQuad quad_uv;
-	vPGQuad quad_diamond;
-
-	vPGQuad quad_normalized_1x2;
-	vPGQuad quad_normalized_1x3;
-	vPGQuad quad_normalized_2x3;
-	vPGQuad quad_normalized_3x4;
-} vGDefaultQuads, *vPGDefaultQuads;
-
 typedef struct _vGInternals
 {
 	vPWorker workerThread;		/* graphics thread		*/
 	vGWindow window;			/* render window		*/
 
-	vHNDL textures;				/* fixed buffer of all textures */
-	vGDefaultTextures defaultTextures;
+	vHNDL shaderList;			/* static list of all shaders */
+	vHNDL skinList;				/* static list of all skins	  */
 
-	vHNDL quads;				/* fixed buffer of all quads	*/
-	vGDefaultQuads defaultQuads;
-
-	vHNDL shaders;				/* fixed buffer of all shaders	*/
-	vGDefaultShaders defaultShaders;
-
-	vUI16 materialComponentHandle;	/* handle to material component				*/
-	vHNDL materialObjects;			/* dynamic list of all material components	*/
-
+	vHNDL renderableList;		/* dynamic list of all renderable objects */
 } _vGInternals, *_vPGInternals;
+
 _vGInternals _vgfx;	/* INSTANCE */
+
 
 #endif
