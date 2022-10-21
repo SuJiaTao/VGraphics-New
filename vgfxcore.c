@@ -57,5 +57,5 @@ VGFXAPI void vGLock(void)
 
 VGFXAPI void vGUnlock(void)
 {
-	LeaveCriticalSection(&_vgfx.lock)
+	LeaveCriticalSection(&_vgfx.lock);
 }

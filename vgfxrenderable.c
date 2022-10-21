@@ -11,6 +11,8 @@
 void vGRenderable_initFunc(vPObject object, vPComponent component)
 {
 	vDBufferAdd(_vgfx.renderableList, component->objectAttribute);
+	vPGRenderable renderableData = component->objectAttribute;
+	renderableData->objectPtr = object;
 }
 
 void vGRenderable_destroyFunc(vPObject object, vPComponent component)

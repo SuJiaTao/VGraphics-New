@@ -72,6 +72,7 @@ typedef struct vGShader
 
 typedef struct vGRenderable
 {
+	vPTR objectPtr;
 	vPTR internalStoredPtr;
 
 	vPGShader shader;
