@@ -24,6 +24,19 @@
 #define SHADERS_MAX					0x040
 #define RENDERABLE_LIST_NODE_SIZE	0x200
 
+/* ========== COLOR VALUES						==========	*/
+#define VGFX_COLOR_0b  54,  90,  92
+#define VGFX_COLOR_1b  77,  19, 109
+#define VGFX_COLOR_2b 154, 184, 169
+#define VGFX_COLOR_3b 233, 226, 171
+#define VGFX_COLOR_4b 239, 187, 102
+
+#define VGFX_COLOR_0f 0.211f, 0.352f, 0.360f
+#define VGFX_COLOR_1f 0.301f, 0.074f, 0.427f
+#define VGFX_COLOR_2f 0.603f, 0.721f, 0.662f
+#define VGFX_COLOR_3f 0.913f, 0.886f, 0.670f
+#define VGFX_COLOR_4f 0.937f, 0.733f, 0.400f
+
 
 /* ========== TYPEDEFS							==========	*/
 typedef void (*vPFGSHADERINIT)(struct vGShader* shader, vPTR shaderData, vPTR input);
