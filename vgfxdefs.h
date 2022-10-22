@@ -46,6 +46,14 @@ typedef void (*vPFGSHADERRENDER)(struct vGShader* shader, vPTR shaderData,
 typedef void (*vPFGSHADEREXIT)(struct vGShader* shader, vPTR shaderData);
 
 
+/* ========== ENUMS								==========	*/
+typedef enum vGDefaultShader
+{
+	vGDefaultShader_Error,
+	vGDefaultShader_Rect,
+} vGDefaultShader;
+
+
 /* ========== MATERIAL AND RELATED				==========	*/
 typedef struct vGSkin
 {
@@ -124,6 +132,18 @@ typedef struct vGInitializeData
 
 
 /* ========== MODULE INTERNALS					==========	*/
+typedef struct vGDefaultShaderData
+{
+	GLuint vertexAttribute;	/* vertex descriptor of buffer	*/
+	GLuint baseRect;	/* vert buffer of basic rectangle	*/
+} vGDefaultShaderData, *vPGDefaultShaderData;
+
+typedef struct vGDefaultShaders
+{
+	vPGShader errShader;
+	vPGShader rectShader;
+} vGDefaultShaders, *vPGDefaultShaders;
+
 typedef struct _vGInternals
 {
 	CRITICAL_SECTION lock;
@@ -138,6 +158,12 @@ typedef struct _vGInternals
 	vHNDL skinList;				/* static list of all skins	  */
 
 	vHNDL renderableList;		/* dynamic list of all renderable objects */
+
+	/* default shader metadata */
+	vGDefaultShaderData defaultShaderData;
+	vGDefaultShaders defaultShaders;
+
+
 } _vGInternals, *_vPGInternals;
 
 _vGInternals _vgfx;	/* INSTANCE */

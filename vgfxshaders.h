@@ -10,16 +10,13 @@
 #include "vgfx.h"
 
 
-/* ========== RECT SHADER						==========	*/
-typedef struct vGS_rectData
-{
-	GLuint vertexAttribute;	/* vertex descriptor of buffer	*/
-	GLuint baseRect;	/* vert buffer of basic rectangle	*/
-} vGS_rectData, *vPGS_rectData;
-
-void vGShader_rectInit(vPGShader shader, vPGS_rectData shaderData, vPTR input);
-void vGShader_rectRender(vPGShader shader, vPGS_rectData shaderData,
+/* ========== ERROR SHADER						==========	*/
+void vGShader_errRender(vPGShader shader, vPTR unused,
 	vPObject object, vPGRenderable renderData);
-void vGShader_rectExit(vPGShader shader, vPTR shaderData);
+
+
+/* ========== RECT SHADER						==========	*/
+void vGShader_rectRender(vPGShader shader, vPTR unused,
+	vPObject object, vPGRenderable renderData);
 
 #endif 

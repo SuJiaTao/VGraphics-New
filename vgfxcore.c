@@ -7,6 +7,7 @@
 #include "vgfxcore.h"
 #include "vgfxthread.h"
 #include "vgfxrenderable.h"
+#include "vgfxshaders.h"
 
 
 /* ========== BUFFER CALLBACKS					==========	*/
@@ -94,11 +95,11 @@ VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER rende
 	shaderObject->renderFunc = renderFunc;
 	shaderObject->exitFunc = exitFunc;
 	shaderObject->shaderDataSizeBytes = shaderDataBytes;
-	shaderObject->shaderDataPtr = vAllocZeroed(shaderDataBytes);
+	shaderObject->shaderDataPtr = vAllocZeroed(max(4, shaderDataBytes));
 
 	/* shader input is ptr to shader object + src */
 	/* TASKINPUT IS FREED BY RENDER THREAD */
-	vPGRT_CShaderInput taskInput = vAllocZeroed(sizeof(vPGRT_CShaderInput));
+	vPGRT_CShaderInput taskInput = vAllocZeroed(sizeof(vGRT_CShaderInput));
 	taskInput->shader    = shaderObject;
 	taskInput->fragSrc   = fragmentSource;
 	taskInput->vertexSrc = vertexSource;

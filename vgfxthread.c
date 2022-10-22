@@ -8,6 +8,7 @@
 #include "glew.h"
 #include "vgfx.h"
 #include "vgfxthread.h"
+#include "vgfxshaders.h"
 #include <stdio.h>
 
 
@@ -84,6 +85,37 @@ static GLuint vhGCreateProgram(GLuint vert, GLuint frag)
 
 	vLogInfo(__func__, "Shader program created.");
 	return shaderProgramID;
+}
+
+static void vhGSetupDefaultShaderData(void)
+{
+	vPGDefaultShaderData shaderData = &_vgfx.defaultShaderData;
+
+	/* initialize VAO for basic rect */
+	glGenVertexArrays(1, &shaderData->vertexAttribute);
+	glBindVertexArray(shaderData->vertexAttribute);
+
+	if (shaderData->vertexAttribute == ZERO)
+	{
+		vLogError(__func__, "Could not create vertex array object.");
+		vCoreFatalError(__func__, "Failed to create vertex array object.");
+	}
+
+	/* create base rectangle (bottom left centered) */
+	float baseRect[4][2] = { { 0, 0 }, { 0, 1 }, { 1, 1 }, { 1, 0} };
+	glGenBuffers(1, &shaderData->baseRect);
+	glBindBuffer(GL_ARRAY_BUFFER, shaderData->baseRect);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(baseRect), baseRect, GL_STATIC_DRAW);
+
+	if (shaderData->baseRect == ZERO)
+	{
+		vLogError(__func__, "Could not create vertex buffer object.");
+		vCoreFatalError(__func__, "Failed to create vertex buffer object.");
+	}
+
+	/* setup vertex attributes */
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 }
 
 
@@ -219,6 +251,10 @@ void vGRT_initFunc(vPWorker worker, vPTR workerData,
 	glClearColor(VGFX_COLOR_0f, 1.0f);
 
 	vLogInfo(__func__, "vGFX Render Thread initialized.");
+
+	/* SETUP DEFAULT SHADER DATA */
+	vhGSetupDefaultShaderData();
+	
 }
 
 void vGRT_exitFunc(vPWorker worker, vPTR workerData)
