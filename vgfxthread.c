@@ -254,7 +254,9 @@ void vGRT_initFunc(vPWorker worker, vPTR workerData,
 
 	/* SETUP DEFAULT SHADER DATA */
 	vhGSetupDefaultShaderData();
-	
+
+	/* FREE INPUT */
+	vFree(input);
 }
 
 void vGRT_exitFunc(vPWorker worker, vPTR workerData)

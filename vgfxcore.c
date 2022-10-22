@@ -4,18 +4,30 @@
 
 
 /* ========== INCLUDES							==========	*/
+#include <stdio.h>
 #include "vgfxcore.h"
 #include "vgfxthread.h"
 #include "vgfxrenderable.h"
 #include "vgfxshaders.h"
 
 
+/* ========== DEBUG FUNCTIONS					==========	*/
+static void vhGValidateHeap(const char* message)
+{
+	printf("heap validation message: %s\n", message);
+	vPTR ptr = vAlloc(8);
+	vFree(ptr);
+}
+
+
 /* ========== BUFFER CALLBACKS					==========	*/
-static void vGRenderableList_initFunc(vHNDL buffer, vPGRenderable* element, 
+static void vGRenderableList_initFunc(vHNDL buffer, vPTR element, 
 	vPGRenderable input)
 {
+	vPGRenderable* renderablePtr = element;
+
 	/* set element to hold pointer to component's renderable object attribute */
-	*element = input;
+	*renderablePtr = input;
 
 	/* set renderable to point back to element (for deletion later) */
 	input->internalStoredPtr = element;
@@ -33,19 +45,25 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 	/* initialize buffers */
 	_vgfx.skinList = vCreateBuffer("vGFX Skin List", sizeof(vGSkin), SKINS_MAX,
 		NULL, NULL, NULL);
+
 	_vgfx.shaderList = vCreateBuffer("vGFX Shader List", sizeof(vGShader), SHADERS_MAX,
 		NULL, NULL, NULL);
-	_vgfx.renderableList = vCreateDBuffer("vGFX Renderable List", sizeof(vGRenderable),
-		RENDERABLE_LIST_NODE_SIZE, vGRenderableList_initFunc, NULL);
+
+	_vgfx.renderableList = vCreateDBuffer("vGFX Renderable List", sizeof(vPGRenderable),
+		RENDERABLE_LIST_NODE_SIZE, NULL, NULL);
+
+	/* MAKE COPY OF INIT DATA ON HEAP FOR THREAD PERSISTENCE */
+	vPGInitializeData heapDataCopy = vAllocZeroed(sizeof(vGInitializeData));
+	vMemCopy(heapDataCopy, initializationData, sizeof(vGInitializeData));
 
 	/* start render worker thread */
 	vTIME timeInterval = 0x400 / (initializationData->targetFrameRate);
 	_vgfx.workerThread = vCreateWorker("vGFX Render Thread", timeInterval,
 		vGRT_initFunc, vGRT_exitFunc, 
-		vGRT_cycleFunc, NULL, initializationData);
+		vGRT_cycleFunc, NULL, heapDataCopy);
 
 	/* create renderable behavior */
-	_vgfx.renderableHandle = vCreateComponent("vGFX Renderable", ZERO, sizeof(vPGRenderable),
+	_vgfx.renderableHandle = vCreateComponent("vGFX Renderable", ZERO, sizeof(vGRenderable),
 		NULL, vGRenderable_initFunc, vGRenderable_destroyFunc, NULL, _vgfx.workerThread);
 }
 
