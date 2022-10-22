@@ -241,4 +241,16 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount,
 	vLogInfoFormatted(__func__, "Skin created from PNG!");
 	return skin;
 }
-VGFXAPI void vGDestroySkin(vPGSkin skin);
+
+VGFXAPI void vGDestroySkin(vPGSkin skin)
+{
+	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
+	/* AS IT REQUIRES AN OPENGL CONTEXT TO BE EXECUTED				*/
+
+	/* refer to vgfxrenderthread.c/h for input implementation */
+	vTIME syncTick =
+		vWorkerDispatchTask(_vgfx.workerThread, vGRT_destroySkinTask, skin);
+	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
+
+	vBufferRemove(_vgfx.skinList, skin);
+}
