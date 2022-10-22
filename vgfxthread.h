@@ -11,7 +11,7 @@
 
 
 /* ========== RENDER THREAD FUNCTIONS			==========	*/
-void vGRT_initFunc(vPWorker worker, vPTR workerData, vPTR input);
+void vGRT_initFunc(vPWorker worker, vPTR workerData, vPGInitializeData input);
 void vGRT_exitFunc(vPWorker worker, vPTR workerData);
 void vGRT_cycleFunc(vPWorker worker, vPTR workerData);
 

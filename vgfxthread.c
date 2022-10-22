@@ -149,6 +149,17 @@ void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable renderable,
 	/* bind to shader handle */
 	glUseProgram(shader->glProgramHandle);
 
+	/* setup projection matrix */
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	LONG width  = _vgfx.window.dimensions.left - _vgfx.window.dimensions.right;
+	LONG height = _vgfx.window.dimensions.top  - _vgfx.window.dimensions.bottom;
+	float aspect = (float)height / (float)width;
+
+	glOrtho(-aspect, aspect, -1, 1, -1, 1);
+	glViewport(0, 0, width, height);
+
 	/* call shader functions */
 	if (shader->renderFunc)
 		shader->renderFunc(shader, shader->shaderDataPtr, renderable->objectPtr,

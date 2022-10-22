@@ -98,6 +98,8 @@ typedef struct vGRenderable
 
 	vGColor tint;
 	vGRect  rect;
+
+	vUI8 layer;
 } vGRenderable, *vPGRenderable;
 
 

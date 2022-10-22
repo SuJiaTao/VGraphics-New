@@ -29,6 +29,7 @@
   <ItemGroup>
     <ClCompile Include="vgfxcore.c" />
     <ClCompile Include="vgfxrenderable.c" />
+    <ClCompile Include="vgfxshaders.c" />
     <ClCompile Include="vgfxthread.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

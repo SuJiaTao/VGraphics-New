@@ -43,7 +43,7 @@
       <Filter>Header Files\Internal</Filter>
     </ClInclude>
     <ClInclude Include="vgfxshaders.h">
-      <Filter>Resource Files\Internal</Filter>
+      <Filter>Header Files\Internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +54,9 @@
       <Filter>Resource Files\Internal</Filter>
     </ClCompile>
     <ClCompile Include="vgfxrenderable.c">
+      <Filter>Resource Files\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="vgfxshaders.c">
       <Filter>Resource Files\Internal</Filter>
     </ClCompile>
   </ItemGroup>
