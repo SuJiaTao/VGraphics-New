@@ -95,13 +95,14 @@ VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER rende
 	shaderObject->shaderDataPtr = vAllocZeroed(shaderDataBytes);
 
 	/* shader input is ptr to shader object + src */
-	vPGRT_CSTInput taskInput = vAllocZeroed(sizeof(vPGRT_CSTInput));
+	/* TASKINPUT IS FREED BY RENDER THREAD */
+	vPGRT_CShaderInput taskInput = vAllocZeroed(sizeof(vPGRT_CShaderInput));
 	taskInput->shader    = shaderObject;
 	taskInput->fragSrc   = fragmentSource;
 	taskInput->vertexSrc = vertexSource;
 	taskInput->userInput = input;
 	
-	/* refer to vgfxrenderthread.c for input implementation */
+	/* refer to vgfxrenderthread.c/h for input implementation */
 	vTIME syncTick = 
 		vWorkerDispatchTask(_vgfx.workerThread, vGRT_createShaderTask, taskInput);
 	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
@@ -111,7 +112,133 @@ VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER rende
 
 VGFXAPI void vGDestroyShader(vPGShader shader)
 {
+	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
+	/* AS IT REQUIRES AN OPENGL CONTEXT TO BE EXECUTED				*/
 
+	/* refer to vgfxrenderthread.c/h for input implementation */
+	vTIME syncTick =
+		vWorkerDispatchTask(_vgfx.workerThread, vGRT_destroyShaderTask, shader);
+	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
+
+	/* free shader data */
+	vFree(shader->shaderDataPtr);
+
+	/* remove shader from buffer */
+	vBufferRemove(_vgfx.shaderList, shader);
 }
 
-VGFXAPI vPGSkin vGCreateSkinFromBytes(void);
+VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
+	vPBYTE bytes)
+{
+	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
+	/* AS IT REQUIRES AN OPENGL CONTEXT TO BE EXECUTED				*/
+
+	vPGSkin skin = vBufferAdd(_vgfx.skinList, NULL);
+	skin->width = width;
+	skin->height = height;
+	skin->skinCount = skinCount;
+
+	/* refer to vgfxrenderthread.c/h for input implementation	*/
+	/* INPUT IS FREED BY RENDER THREAD							*/
+	vPGRT_CSkinInput input = vAllocZeroed(sizeof(vGRT_CSkinInput));
+	input->skin     = skin;
+	input->byteData = bytes;
+
+	/* refer to vgfxrenderthread.c/h for input implementation */
+	vTIME syncTick =
+		vWorkerDispatchTask(_vgfx.workerThread, vGRT_createSkinTask, input);
+	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
+
+	return skin;
+}
+
+VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount,
+	vPCHAR filePath)
+{
+	/* REQUIRES UNCOMPRESSED PNG, LATER CALLS vGCreateSkinFromBytes */
+
+	/* skin object */
+	vPGSkin skin = NULL;
+
+	vLogInfoFormatted(__func__, "Creating skin from file path: %s.", filePath);
+
+	/* get file handle */
+	HANDLE fileHndl = vFileOpen(filePath);
+	if (fileHndl == INVALID_HANDLE_VALUE)
+	{
+		vLogError(__func__, "Failed open file.");
+		return NULL;
+	}
+
+	/* load file into primary memory */
+	vUI64 fileSizeBytes = vFileSize(fileHndl);
+	vPBYTE fileBlock = vAlloc(fileSizeBytes);
+	vBOOL result = vFileRead(fileHndl, 0, fileSizeBytes, fileBlock);
+	if (result == FALSE)
+	{
+		vLogError(__func__, "Failed to read file.");
+		return NULL;
+	}
+
+	vUI32 readPointer = 8;	/* move past header */
+	while (TRUE)
+	{
+		/* get chunk length */
+		vUI32 blockLength;
+		vMemCopy(&blockLength, fileBlock + readPointer, sizeof(blockLength));
+		blockLength = _byteswap_ulong(blockLength); /* swap endian */
+
+		readPointer += 4; /* move up 4 bytes */
+
+		/* get chunk type */
+		vCHAR blockName[5];	/* size 4 with null padding */
+		blockName[4] = 0;
+		vMemCopy(blockName, fileBlock + readPointer, 4);
+
+		readPointer += 4; /* move up 4 bytes */
+
+		/* if end chunk, break */
+		if (strcmp(blockName, "IEND") == ZERO) break;
+
+		/* if data chunk, parse data to remove all filter bytes */
+		if (strcmp(blockName, "IDAT") == ZERO)
+		{
+			vPBYTE parsedBlock = vAlloc(width * height * 4);
+			vPBYTE imageData = fileBlock + (readPointer + 8);
+			vUI64  imageByteIndex = 0;
+			for (int i = 0; i < height; i++)
+			{
+				/* invert Y */
+				int heightActual = height - i - 1;
+
+				/* copy data */
+				vPBYTE parseBlockWritePtr = parsedBlock + (heightActual * width * 4);
+				vPBYTE imageDataReadPtr = imageData + imageByteIndex;
+				vMemCopy(parseBlockWritePtr, imageDataReadPtr, width * 4);
+
+				/* image byte index is incremented by the width + 1 to account for	*/
+				/* the extra filter byte. what a pain!								*/
+				imageByteIndex = imageByteIndex + (width * 4) + 1;
+			}
+
+			/* create texture using parsed block */
+			skin = vGCreateSkinFromBytes(width, height, skinCount,
+				parsedBlock);
+
+			/* free memory and break */
+			vFree(parsedBlock);
+			break;
+		}
+
+		/* move to next chunk */
+		readPointer = readPointer + blockLength + 4;
+	}
+
+	/* free data */
+	vFree(fileBlock);
+	vFileClose(fileHndl);
+
+	vLogInfoFormatted(__func__, "Skin created from PNG!");
+	return skin;
+}
+VGFXAPI void vGDestroySkin(vPGSkin skin);

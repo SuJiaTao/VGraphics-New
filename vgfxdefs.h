@@ -48,14 +48,11 @@ typedef void (*vPFGSHADERRENDER)(struct vGShader* shader, vPTR shaderData,
 /* ========== MATERIAL AND RELATED				==========	*/
 typedef struct vGSkin
 {
-	GLuint glHandle;
+	GLuint glHandle; /* openGL texture object */
 
-	vUI16  width;
-	vUI16  height;
-	vUI8 skinCount;
-
-	vUI8 skinWidth;
-	vUI8  skinHeight;
+	vUI16 width;
+	vUI16 height;
+	vUI8  skinCount; /* starts from 0 */
 } vGSkin, *vPGSkin;
 
 typedef struct vGRect
@@ -76,6 +73,8 @@ typedef struct vGColor
 
 typedef struct vGShader
 {
+	GLuint glVertHandle;
+	GLuint glFragHandle;
 	GLuint glProgramHandle;
 
 	vUI32  shaderDataSizeBytes;

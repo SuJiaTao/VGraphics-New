@@ -248,7 +248,7 @@ void vGRT_cycleFunc(vPWorker worker, vPTR workerData)
 
 
 /* ========== TASKABLE FUNCTIONS				==========	*/
-void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CSTInput input)
+void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CShaderInput input)
 {
 	vLogInfo(__func__, "Creating Shader on Render Thread.");
 
@@ -261,6 +261,8 @@ void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CSTInput inpu
 	GLuint fragShader = vhGCompileShader(GL_FRAGMENT_SHADER, input->fragSrc);
 
 	/* link and assign to shader */
+	input->shader->glVertHandle = vertShader;
+	input->shader->glFragHandle = fragShader;
 	input->shader->glProgramHandle = vhGCreateProgram(vertShader,
 		fragShader);
 
@@ -268,6 +270,46 @@ void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CSTInput inpu
 	vPGShader shader = input->shader;
 	if (shader->initFunc)
 		shader->initFunc(shader, shader->shaderDataPtr, input->userInput);
+
+	vLogInfo(__func__, "Shader created sucessfully.");
+
+	/* FREE INPUT */
+	vFree(input);
 }
 
-void vGRT_destroyShaderTask(vPWorker worker, vPTR workerData, vPTR input);
+void vGRT_destroyShaderTask(vPWorker worker, vPTR workerData, vPTR input)
+{
+	vPGShader targetShader = input;
+
+	/* get GL to delete all objects */
+	glDeleteProgram(targetShader->glProgramHandle);
+	glDeleteShader(targetShader->glVertHandle);
+	glDeleteShader(targetShader->glFragHandle);
+}
+
+void vGRT_createSkinTask(vPWorker worker, vPTR workerData, vPGRT_CSkinInput input)
+{
+	vPGSkin skin = input->skin;
+
+	/* generate texture with alpha support */
+	glGenTextures(1, &skin->glHandle);
+	glBindTexture(GL_TEXTURE_2D, skin->glHandle);
+	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGBA, skin->width, skin->height, ZERO, GL_RGBA,
+		GL_UNSIGNED_BYTE, input->byteData);
+
+	/* forced wrap filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	/* forced linear filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	/* FREE INPUT */
+	vFree(input);
+}
+
+void vGRT_destroySkinTask(vPWorker worker, vPTR workerData, vPGSkin input)
+{
+	glDeleteTextures(1, &input->glHandle);
+}

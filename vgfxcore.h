@@ -28,6 +28,10 @@ VGFXAPI void vGDestroyRenderable(vPObject object);
 VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER renderFunc,
 	vUI32 shaderDataBytes, vPCHAR vertexSource, vPCHAR fragmentSource, vPTR input);
 VGFXAPI void vGDestroyShader(vPGShader shader);
-VGFXAPI vPGSkin vGCreateSkinFromBytes(void);
+VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
+	vPBYTE bytes);
+VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount,
+	vPCHAR fileName);
+VGFXAPI void vGDestroySkin(vPGSkin skin);
 
 #endif

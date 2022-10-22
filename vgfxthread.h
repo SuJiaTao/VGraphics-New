@@ -17,15 +17,22 @@ void vGRT_cycleFunc(vPWorker worker, vPTR workerData);
 
 
 /* ========== TASKABLE FUNCTIONS				==========	*/
-typedef struct vGRT_CSTInput
+typedef struct vGRT_CShaderInput
 {
 	vPGShader shader;
 	vPCHAR	  vertexSrc;
 	vPCHAR	  fragSrc;
 	vPTR	  userInput;
-} vGRT_CSTInput, *vPGRT_CSTInput;
-void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CSTInput input);
+} vGRT_CShaderInput, *vPGRT_CShaderInput;
+void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CShaderInput input);
 void vGRT_destroyShaderTask(vPWorker worker, vPTR workerData, vPTR input);
+typedef struct vGRT_CSkinInput
+{
+	vPGSkin skin;
+	vPBYTE  byteData;
+} vGRT_CSkinInput, *vPGRT_CSkinInput;
+void vGRT_createSkinTask(vPWorker worker, vPTR workerData, vPGRT_CSkinInput input);
+void vGRT_destroySkinTask(vPWorker worker, vPTR workerData, vPGSkin input);
 
 
 
