@@ -25,6 +25,9 @@
 #define RENDERABLE_LIST_NODE_SIZE	0x200
 #define WORKER_WAITTIME_MAX			UINT64_MAX
 
+#define WINDOW_WIDTH_MIN	0x180
+#define WINDOW_HEIGHT_MIN	0x180
+
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
 #define VGFX_COLOR_1b  77,  19, 109

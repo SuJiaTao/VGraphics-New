@@ -126,8 +126,19 @@ static LRESULT CALLBACK vGWindowProc(HWND window, UINT message,
 	PIXELFORMATDESCRIPTOR pixelFormat;
 	vZeroMemory(&pixelFormat, sizeof(PIXELFORMATDESCRIPTOR));
 
+	PMINMAXINFO sizeLimitInfoOut;
+
 	switch (message)
 	{
+	/* WINDOW SIZE LIMIT CALLBACK */
+	case WM_GETMINMAXINFO:
+
+		sizeLimitInfoOut = (PMINMAXINFO)lparam;
+		sizeLimitInfoOut->ptMinTrackSize.x = WINDOW_WIDTH_MIN;
+		sizeLimitInfoOut->ptMinTrackSize.y = WINDOW_HEIGHT_MIN;
+		break;
+
+	/* CREATION CALLBACK */
 	case WM_CREATE:
 		vLogInfo(__func__, "vGWindowProc recieved message WM_CREATE.");
 
@@ -159,6 +170,12 @@ static LRESULT CALLBACK vGWindowProc(HWND window, UINT message,
 		if (wglCurrentCheck == FALSE)
 		{
 			vLogErrorFormatted(__func__, "wglMakeCurrent returned FALSE");
+		}
+
+		/* bring window to top */
+		if (BringWindowToTop(window) == FALSE)
+		{
+			vLogWarning(__func__, "Unable to bring window to top upon initialization.");
 		}
 
 		break;
