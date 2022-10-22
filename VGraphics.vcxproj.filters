@@ -42,6 +42,9 @@
     <ClInclude Include="vgfxrenderable.h">
       <Filter>Header Files\Internal</Filter>
     </ClInclude>
+    <ClInclude Include="vgfxshaders.h">
+      <Filter>Resource Files\Internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vgfxcore.c">

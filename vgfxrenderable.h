@@ -1,5 +1,5 @@
 
-/* ========== <vgfxrenderable.h					==========	*/
+/* ========== <vgfxrenderable.h>				==========	*/
 /* Bailey Jia-Tao Brown							2022		*/
 /* Rendererable component behavior (internal access)		*/
 

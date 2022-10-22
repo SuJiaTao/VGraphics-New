@@ -1,5 +1,5 @@
 
-/* ========== <vgfxthread.h>					==========	*/
+/* ========== <vgfxthread.c>					==========	*/
 /* Bailey Jia-Tao Brown							2022		*/
 
 /* ========== INCLUDES							==========	*/

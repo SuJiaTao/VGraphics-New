@@ -23,6 +23,7 @@
     <ClInclude Include="vgfxcore.h" />
     <ClInclude Include="vgfxdefs.h" />
     <ClInclude Include="vgfxrenderable.h" />
+    <ClInclude Include="vgfxshaders.h" />
     <ClInclude Include="vgfxthread.h" />
   </ItemGroup>
   <ItemGroup>
