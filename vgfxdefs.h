@@ -43,6 +43,7 @@
 typedef void (*vPFGSHADERINIT)(struct vGShader* shader, vPTR shaderData, vPTR input);
 typedef void (*vPFGSHADERRENDER)(struct vGShader* shader, vPTR shaderData, 
 	struct vObject* object, struct vGRenderable* renderData);
+typedef void (*vPFGSHADEREXIT)(struct vGShader* shader, vPTR shaderData);
 
 
 /* ========== MATERIAL AND RELATED				==========	*/
@@ -82,6 +83,7 @@ typedef struct vGShader
 
 	vPFGSHADERINIT   initFunc;
 	vPFGSHADERRENDER renderFunc;
+	vPFGSHADEREXIT   exitFunc;
 } vGShader, *vPGShader;
 
 typedef struct vGRenderable

@@ -82,7 +82,8 @@ VGFXAPI void vGDestroyRenderable(vPObject object)
 
 /* ========== OBJECT CREATION AND DESTRUCTION	==========	*/
 VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER renderFunc,
-	vUI32 shaderDataBytes, vPCHAR vertexSource, vPCHAR fragmentSource, vPTR input)
+	vPFGSHADEREXIT exitFunc, vUI32 shaderDataBytes, vPCHAR vertexSource, vPCHAR fragmentSource,
+	vPTR input)
 {
 	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
 	/* AS IT REQUIRES AN OPENGL CONTEXT TO BE EXECUTED				*/
@@ -91,6 +92,7 @@ VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER rende
 	vPGShader shaderObject = vBufferAdd(_vgfx.shaderList, NULL);
 	shaderObject->initFunc = initFunc;
 	shaderObject->renderFunc = renderFunc;
+	shaderObject->exitFunc = exitFunc;
 	shaderObject->shaderDataSizeBytes = shaderDataBytes;
 	shaderObject->shaderDataPtr = vAllocZeroed(shaderDataBytes);
 

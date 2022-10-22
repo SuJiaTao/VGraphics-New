@@ -281,6 +281,10 @@ void vGRT_destroyShaderTask(vPWorker worker, vPTR workerData, vPTR input)
 {
 	vPGShader targetShader = input;
 
+	/* call exit callback */
+	if (targetShader->exitFunc)
+		targetShader->exitFunc(targetShader, targetShader->shaderDataPtr);
+
 	/* get GL to delete all objects */
 	glDeleteProgram(targetShader->glProgramHandle);
 	glDeleteShader(targetShader->glVertHandle);

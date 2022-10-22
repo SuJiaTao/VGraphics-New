@@ -26,7 +26,8 @@ VGFXAPI void vGDestroyRenderable(vPObject object);
 
 /* ========== OBJECT CREATION AND DESTRUCTION	==========	*/
 VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER renderFunc,
-	vUI32 shaderDataBytes, vPCHAR vertexSource, vPCHAR fragmentSource, vPTR input);
+	vPFGSHADEREXIT exitFunc, vUI32 shaderDataBytes, vPCHAR vertexSource, vPCHAR fragmentSource, 
+	vPTR input);
 VGFXAPI void vGDestroyShader(vPGShader shader);
 VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
 	vPBYTE bytes);
