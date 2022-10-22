@@ -23,6 +23,7 @@
 #define SKINS_MAX					0x400
 #define SHADERS_MAX					0x040
 #define RENDERABLE_LIST_NODE_SIZE	0x200
+#define WORKER_WAITTIME_MAX			UINT64_MAX
 
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
@@ -80,6 +81,7 @@ typedef struct vGShader
 	vUI32  shaderDataSizeBytes;
 	vPTR   shaderDataPtr;
 
+	vPFGSHADERINIT   initFunc;
 	vPFGSHADERRENDER renderFunc;
 } vGShader, *vPGShader;
 

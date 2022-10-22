@@ -18,4 +18,16 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData);
 VGFXAPI void vGLock(void);
 VGFXAPI void vGUnlock(void);
 
+
+/* ========== RENDERABLE ATTACHMENT				==========	*/
+VGFXAPI void vGCreateRenderable(vPObject object, vPGShader shader, vPGSkin skin, vGRect rect);
+VGFXAPI void vGDestroyRenderable(vPObject object);
+
+
+/* ========== OBJECT CREATION AND DESTRUCTION	==========	*/
+VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER renderFunc,
+	vUI32 shaderDataBytes, vPCHAR vertexSource, vPCHAR fragmentSource, vPTR input);
+VGFXAPI void vGDestroyShader(vPGShader shader);
+VGFXAPI vPGSkin vGCreateSkinFromBytes(void);
+
 #endif

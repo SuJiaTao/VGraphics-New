@@ -11,7 +11,7 @@
 
 
 /* ========== RENDER COMPONENT BEHAVIOR			==========	*/
-void vGRenderable_initFunc(vPObject object, vPComponent component);
+void vGRenderable_initFunc(vPObject object, vPComponent component, vPTR input);
 void vGRenderable_destroyFunc(vPObject object, vPComponent component);
 
 

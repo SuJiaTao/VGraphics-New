@@ -11,6 +11,82 @@
 #include <stdio.h>
 
 
+/* ========== HELPER							==========	*/
+static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
+{
+	vLogInfo(__func__, "Started Compiling Shader.");
+
+	/* create empty shader object */
+	GLuint shaderID = glCreateShader(shaderType);
+
+	/* assign source and compile */
+	glShaderSource(shaderID, 1, &source, ZERO);
+	glCompileShader(shaderID);
+
+	/* ensure shader compiled properly */
+	GLint compileStatus;
+	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &compileStatus);
+
+	/* if shader failed to compile, dump to file */
+	if (compileStatus == FALSE)
+	{
+		vLogError(__func__, "Shader failed to compile.");
+
+		GLsizei writeLength; /* unused */
+
+		/* get error message */
+		GLchar  errorBuff = vAllocZeroed(BUFF_MASSIVE);
+		glGetShaderInfoLog(shaderID, sizeof(errorBuff), &writeLength, errorBuff);
+
+		/* create err file name */
+		vPCHAR errfileName = vAllocZeroed(BUFF_MEDIUM);
+		sprintf_s(errfileName, BUFF_MEDIUM, "shader err log %I64X", GetTickCount64());
+		vLogErrorFormatted(__func__, "Dumping shader error to file: '%s'.", errfileName);
+
+		/* create dump to file */
+		HANDLE fHandle = vFileCreate(errfileName);
+		vFileWrite(fHandle, ZERO, BUFF_MASSIVE, errorBuff);
+		vFileClose(fHandle);
+
+		/* free all memory */
+		vFree(errorBuff);
+		vFree(errfileName);
+
+		return ZERO;
+	}
+
+	return shaderID;
+}
+
+static GLuint vhGCreateProgram(GLuint vert, GLuint frag)
+{
+	vLogInfo(__func__, "Creating shader program.");
+
+	/* create new program and link vert & frag to it */
+	GLuint shaderProgramID = glCreateProgram();
+	glAttachShader(shaderProgramID, vert);
+	glAttachShader(shaderProgramID, frag);
+	glLinkProgram(shaderProgramID);
+
+	/* check linking status */
+	GLuint linkStatus;
+	glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &linkStatus);
+
+	/* log linking failures */
+	if (linkStatus == FALSE)
+	{
+		vLogError(__func__, "Shader program failed to link.");
+		vCHAR errorBuffer[BUFF_LARGE];
+		glGetProgramInfoLog(shaderProgramID, sizeof(errorBuffer), NULL, errorBuffer);
+		vLogError(__func__, errorBuffer);
+		return ZERO;
+	}
+
+	vLogInfo(__func__, "Shader program created.");
+	return shaderProgramID;
+}
+
+
 /* ========== WIN32 WINDOW PROC CALLBACK		==========	*/
 static LRESULT CALLBACK vGWindowProc(HWND window, UINT message,
 	WPARAM wparam, LPARAM lparam)
@@ -56,6 +132,7 @@ static LRESULT CALLBACK vGWindowProc(HWND window, UINT message,
 		break;
 	}
 
+	/* call default window proc (as defined by win32) */
 	return DefWindowProcA(window, message, wparam, lparam);
 }
 
@@ -66,6 +143,9 @@ void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable renderable,
 {
 	vPGShader shader = renderable->shader;
 
+	/* ensure shader exists */
+	if (shader == NULL) return;
+	
 	/* bind to shader handle */
 	glUseProgram(shader->glProgramHandle);
 
@@ -77,7 +157,7 @@ void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable renderable,
 
 
 /* ========== RENDER THREAD FUNCTIONS			==========	*/
-void vGRenderThread_initFunc(vPWorker worker, vPTR workerData, 
+void vGRT_initFunc(vPWorker worker, vPTR workerData, 
 	vPGInitializeData input)
 {
 	vLogInfo(__func__, "vGFX Render Thread initializing.");
@@ -124,15 +204,18 @@ void vGRenderThread_initFunc(vPWorker worker, vPTR workerData,
 	/* initialize GLEW */
 	glewInit();
 
+	/* setup CLEAR color */
+	glClearColor(VGFX_COLOR_0f, 1.0f);
+
 	vLogInfo(__func__, "vGFX Render Thread initialized.");
 }
 
-void vGRenderThread_exitFunc(vPWorker worker, vPTR workerData)
+void vGRT_exitFunc(vPWorker worker, vPTR workerData)
 {
 
 }
 
-void vGRenderThread_cycleFunc(vPWorker worker, vPTR workerData)
+void vGRT_cycleFunc(vPWorker worker, vPTR workerData)
 {
 	vGLock();
 
@@ -162,3 +245,29 @@ void vGRenderThread_cycleFunc(vPWorker worker, vPTR workerData)
 
 	vGUnlock();
 }
+
+
+/* ========== TASKABLE FUNCTIONS				==========	*/
+void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CSTInput input)
+{
+	vLogInfo(__func__, "Creating Shader on Render Thread.");
+
+	/* compile vertex shader */
+	vLogInfo(__func__, "Compiling vertex shader.");
+	GLuint vertShader = vhGCompileShader(GL_VERTEX_SHADER, input->vertexSrc);
+
+	/* compile fragment shader */
+	vLogInfo(__func__, "Compiling fragment shader.");
+	GLuint fragShader = vhGCompileShader(GL_FRAGMENT_SHADER, input->fragSrc);
+
+	/* link and assign to shader */
+	input->shader->glProgramHandle = vhGCreateProgram(vertShader,
+		fragShader);
+
+	/* call initialization */
+	vPGShader shader = input->shader;
+	if (shader->initFunc)
+		shader->initFunc(shader, shader->shaderDataPtr, input->userInput);
+}
+
+void vGRT_destroyShaderTask(vPWorker worker, vPTR workerData, vPTR input);

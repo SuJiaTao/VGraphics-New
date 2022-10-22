@@ -40,8 +40,8 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 	/* start render worker thread */
 	vTIME timeInterval = 0x400 / (initializationData->targetFrameRate);
 	_vgfx.workerThread = vCreateWorker("vGFX Render Thread", timeInterval,
-		vGRenderThread_initFunc, vGRenderThread_exitFunc, 
-		vGRenderThread_cycleFunc, NULL, initializationData);
+		vGRT_initFunc, vGRT_exitFunc, 
+		vGRT_cycleFunc, NULL, initializationData);
 
 	/* create renderable behavior */
 	_vgfx.renderableHandle = vCreateComponent("vGFX Renderable", ZERO, sizeof(vPGRenderable),
@@ -59,3 +59,59 @@ VGFXAPI void vGUnlock(void)
 {
 	LeaveCriticalSection(&_vgfx.lock);
 }
+
+
+/* ========== RENDERABLE ATTACHMENT				==========	*/
+VGFXAPI void vGCreateRenderable(vPObject object, vPGShader shader, vPGSkin skin
+	, vGRect rect)
+{
+	vPGRenderable input = vAllocZeroed(sizeof(vGRenderable));
+	input->shader = shader;
+	input->skin = skin;
+	input->rect = rect;
+
+	/* refer to vgfxrenderable.c for input behavior */
+	vObjectAddComponent(object, _vgfx.renderableHandle, input);
+}
+
+VGFXAPI void vGDestroyRenderable(vPObject object)
+{
+	vObjectRemoveComponent(object, _vgfx.renderableHandle);
+}
+
+
+/* ========== OBJECT CREATION AND DESTRUCTION	==========	*/
+VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER renderFunc,
+	vUI32 shaderDataBytes, vPCHAR vertexSource, vPCHAR fragmentSource, vPTR input)
+{
+	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
+	/* AS IT REQUIRES AN OPENGL CONTEXT TO BE EXECUTED				*/
+
+	/* get shader object from buffer */
+	vPGShader shaderObject = vBufferAdd(_vgfx.shaderList, NULL);
+	shaderObject->initFunc = initFunc;
+	shaderObject->renderFunc = renderFunc;
+	shaderObject->shaderDataSizeBytes = shaderDataBytes;
+	shaderObject->shaderDataPtr = vAllocZeroed(shaderDataBytes);
+
+	/* shader input is ptr to shader object + src */
+	vPGRT_CSTInput taskInput = vAllocZeroed(sizeof(vPGRT_CSTInput));
+	taskInput->shader    = shaderObject;
+	taskInput->fragSrc   = fragmentSource;
+	taskInput->vertexSrc = vertexSource;
+	taskInput->userInput = input;
+	
+	/* refer to vgfxrenderthread.c for input implementation */
+	vTIME syncTick = 
+		vWorkerDispatchTask(_vgfx.workerThread, vGRT_createShaderTask, taskInput);
+	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
+
+	return shaderObject;
+}
+
+VGFXAPI void vGDestroyShader(vPGShader shader)
+{
+
+}
+
+VGFXAPI vPGSkin vGCreateSkinFromBytes(void);
