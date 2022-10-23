@@ -185,7 +185,7 @@ VGFXAPI void vGDestroyShader(vPGShader shader)
 	vBufferRemove(_vgfx.shaderList, shader);
 }
 
-VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
+VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount, vBOOL wrap,
 	vPBYTE bytes)
 {
 	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
@@ -195,6 +195,7 @@ VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
 	skin->width = width;
 	skin->height = height;
 	skin->skinCount = skinCount;
+	skin->wrapped = wrap;
 
 	/* refer to vgfxrenderthread.c/h for input implementation	*/
 	/* INPUT IS FREED BY RENDER THREAD							*/
@@ -210,7 +211,7 @@ VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
 	return skin;
 }
 
-VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount,
+VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, vBOOL wrap,
 	vPCHAR filePath)
 {
 	/* REQUIRES UNCOMPRESSED PNG, LATER CALLS vGCreateSkinFromBytes */
@@ -280,7 +281,7 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount,
 			}
 
 			/* create texture using parsed block */
-			skin = vGCreateSkinFromBytes(width, height, skinCount,
+			skin = vGCreateSkinFromBytes(width, height, skinCount, wrap,
 				parsedBlock);
 
 			/* free memory and break */

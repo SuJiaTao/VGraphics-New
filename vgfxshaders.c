@@ -162,6 +162,18 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 		float textureSkinZoomScale = 1.0f / (float)(renderData->skin->skinCount + 1);
 		glTranslatef(renderData->renderSkin * textureSkinZoomScale, 0.0f, 0.0f);
 		glScalef(textureSkinZoomScale, 1.0f, 1.0f);
+
+		/* wrap texture if necessary */
+		if (renderData->skin->wrapped == TRUE)
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		}
+		else
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		}
 	}
 
 	/* bind to buffer and vertex array */

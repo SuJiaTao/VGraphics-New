@@ -62,6 +62,7 @@ typedef struct vGSkin
 {
 	GLuint glHandle; /* openGL texture object */
 
+	vBOOL wrapped;
 	vUI16 width;
 	vUI16 height;
 	vUI8  skinCount; /* starts from 0 */

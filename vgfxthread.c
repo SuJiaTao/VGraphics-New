@@ -126,7 +126,6 @@ static void vhGSetupMissingTexture(void)
 	vLogInfoFormatted(__func__, "Generated default texture object. OpenGL error: %d.",
 		glGetError());
 
-	/* forced wrap filter */
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -428,9 +427,17 @@ void vGRT_createSkinTask(vPWorker worker, vPTR workerData, vPGRT_CSkinInput inpu
 	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGBA, skin->width, skin->height, ZERO, GL_RGBA,
 		GL_UNSIGNED_BYTE, input->byteData);
 
-	/* forced wrap filter */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	/* apply wrap flags */
+	if (skin->wrapped == TRUE)
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+	else
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	}
 
 	/* forced linear filter */
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
