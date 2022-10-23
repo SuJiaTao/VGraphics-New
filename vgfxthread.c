@@ -25,11 +25,11 @@ static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
 	glCompileShader(shaderID);
 
 	/* ensure shader compiled properly */
-	GLint compileStatus;
+	GLint compileStatus = GL_FALSE;
 	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &compileStatus);
 
 	/* if shader failed to compile, dump to file */
-	if (compileStatus == FALSE)
+	if (compileStatus == GL_FALSE)
 	{
 		vLogError(__func__, "Shader failed to compile.");
 
@@ -37,11 +37,11 @@ static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
 
 		/* get error message */
 		GLchar* errorBuff = vAllocZeroed(BUFF_MASSIVE);
-		glGetShaderInfoLog(shaderID, sizeof(errorBuff), &writeLength, errorBuff);
+		glGetShaderInfoLog(shaderID, BUFF_MASSIVE, &writeLength, errorBuff);
 
 		/* create err file name */
 		vPCHAR errfileName = vAllocZeroed(BUFF_MEDIUM);
-		sprintf_s(errfileName, BUFF_MEDIUM, "shader err log %I64X", GetTickCount64());
+		sprintf_s(errfileName, BUFF_MEDIUM, "shader err log %I64X.txt", GetTickCount64());
 		vLogErrorFormatted(__func__, "Dumping shader error to file: '%s'.", errfileName);
 
 		/* create dump to file */
@@ -214,12 +214,12 @@ void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable* element,
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	LONG width  = _vgfx.window.dimensions.left - _vgfx.window.dimensions.right;
-	LONG height = _vgfx.window.dimensions.top  - _vgfx.window.dimensions.bottom;
+	LONG width  = _vgfx.window.dimensions.right   - _vgfx.window.dimensions.left;
+	LONG height = _vgfx.window.dimensions.bottom  - _vgfx.window.dimensions.top;
 	float aspect = (float)height / (float)width;
 
-	glOrtho(-aspect, aspect, -1, 1, -1, 1);
 	glViewport(0, 0, width, height);
+	glOrtho(-aspect, aspect, -1, 1, -1, 1);
 
 	/* call shader functions */
 	if (shader->renderFunc)
@@ -286,6 +286,9 @@ void vGRT_initFunc(vPWorker worker, vPTR workerData,
 
 	/* FREE INPUT */
 	vFree(input);
+
+	/* DUMP ENTRY BUFFER */
+	vDumpEntryBuffer();
 }
 
 void vGRT_exitFunc(vPWorker worker, vPTR workerData)
@@ -305,9 +308,7 @@ void vGRT_cycleFunc(vPWorker worker, vPTR workerData)
 	/* update window state */
 	GetClientRect(_vgfx.window.window, &_vgfx.window.dimensions);
 
-	/* setup viewport and clear */
-	glViewport(0, 0, _vgfx.window.dimensions.left - _vgfx.window.dimensions.right,
-		_vgfx.window.dimensions.top - _vgfx.window.dimensions.bottom);
+	/* clear color and depth buffer */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	/* draw all renderables */

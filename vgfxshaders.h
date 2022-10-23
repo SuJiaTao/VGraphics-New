@@ -18,6 +18,8 @@ void vGShader_errRender(vPGShader shader, vPTR unused,
 
 
 /* ========== RECT SHADER						==========	*/
+vPCHAR vGShader_rectRenderGetVert(void);
+vPCHAR vGShader_rectRenderGetFrag(void);
 void vGShader_rectRender(vPGShader shader, vPTR unused,
 	vPObject object, vPGRenderable renderData);
 

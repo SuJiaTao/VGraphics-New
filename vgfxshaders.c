@@ -18,12 +18,9 @@ static vPCHAR vGShader_errVert =
 	"layout (location = 3) uniform mat4 v_model;\n"
 	"layout (location = 4) uniform mat4 v_texture;\n"
 	"\n"
-	"out vec2 f_textureUV;\n"
-	"\n"
 	"void main()\n"
 	"{\n"
-	"\tf_color = v_color;\n"
-	"\tgl_Position = v_projectionMatrix * v_modelMatrix * vec4(v_position, 0.0, 1.0);\t\t\n"
+	"\tgl_Position = v_projection * v_model * vec4(v_position, 0.0, 1.0);\t\t\n"
 	"}";
 
 static vPCHAR vGShader_errFrag =
@@ -56,6 +53,11 @@ void vGShader_errRender(vPGShader shader, vPTR unused,
 
 
 /* ========== RECT SHADER						==========	*/
+static vPCHAR vGShader_rectVert = "";
+
+vPCHAR vGShader_rectRenderGetVert(void);
+vPCHAR vGShader_rectRenderGetFrag(void);
+
 void vGShader_rectRender(vPGShader shader, vPTR unused,
 	vPObject object, vPGRenderable renderData)
 {
