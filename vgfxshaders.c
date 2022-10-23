@@ -149,9 +149,15 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 	/* default to use flat skin texture */
 	glBindTexture(GL_TEXTURE_2D, _vgfx.defaultShaderData.missingTexture);
 
+	/* set tint to be unused (unless texture is found) */
+	vGColor renderTint = vGCreateColorF(1.0f, 1.0f, 1.0f, 1.0f);
+
 	/* if skin exists, use that instead */
 	if (renderData->skin != NULL)
 	{
+		renderTint = renderData->tint; /* set tint to match render data */
+
+		/* bind texture and setup texture UV */
 		glBindTexture(GL_TEXTURE_2D, renderData->skin->glHandle);
 		float textureSkinZoomScale = 1.0f / (float)(renderData->skin->skinCount + 1);
 		glTranslatef(renderData->renderSkin * textureSkinZoomScale, 0.0f, 0.0f);
@@ -171,7 +177,7 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 	glGetFloatv(GL_TEXTURE_MATRIX, textureMatrix);
 
 	/* apply uniform values */
-	glUniform4fv(1, 1, &renderData->tint);
+	glUniform4fv(1, 1, &renderTint);
 	glUniformMatrix4fv(2, 1, GL_FALSE, projectionMatrix);
 	glUniformMatrix4fv(3, 1, GL_FALSE, modelMatrix);
 	glUniformMatrix4fv(4, 1, GL_FALSE, textureMatrix);

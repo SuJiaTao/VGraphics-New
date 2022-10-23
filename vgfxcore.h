@@ -41,6 +41,10 @@ VGFXAPI vGColor vGCreateColorF(float r, float g, float b, float a);
 VGFXAPI vGColor vGCreateColorB(vBYTE r, vBYTE g, vBYTE b, vBYTE a);
 
 
+/* ========== DEFAULT VALUES					==========	*/
+VGFXAPI vPGShader vGGetDefaultShader(vGDefaultShader shaderType);
+
+
 /* ========== INTERNALS							==========	*/
 VGFXAPI _vPGInternals vGGetInternals(void);
 

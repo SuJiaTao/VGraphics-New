@@ -334,6 +334,26 @@ VGFXAPI vGColor vGCreateColorB(vBYTE r, vBYTE g, vBYTE b, vBYTE a)
 }
 
 
+/* ========== DEFAULT VALUES					==========	*/
+VGFXAPI vPGShader vGGetDefaultShader(vGDefaultShader shaderType)
+{
+	switch (shaderType)
+	{
+	case vGDefaultShader_Error:
+		return _vgfx.defaultShaders.errShader;
+
+	case vGDefaultShader_Rect:
+		return _vgfx.defaultShaders.rectShader;
+
+	default:
+		break;
+	}
+
+	vLogError(__func__, "Tried to retrieve invalid default shader type.");
+	return NULL;
+}
+
+
 /* ========== INTERNALS							==========	*/
 VGFXAPI _vPGInternals vGGetInternals(void)
 {

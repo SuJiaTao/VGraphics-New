@@ -91,6 +91,52 @@ static GLuint vhGCreateProgram(GLuint vert, GLuint frag)
 	return shaderProgramID;
 }
 
+static void vhGSetupMissingTexture(void)
+{
+	const int missingTextureSize = 0x10;
+
+	/* allocate memory for missing texture data */
+	SIZE_T allocSize = 
+		sizeof(vBYTE) * missingTextureSize * missingTextureSize * 4;
+	vPBYTE missingTextureBytes = vAlloc(allocSize);
+
+	/* set all values to 255 */
+	__stosb(missingTextureBytes, 255, allocSize); 
+
+	/* generate diagonal red line */
+	for (int i = 0; i < missingTextureSize; i++)
+	{
+		int offsetY = i * missingTextureSize * 4;
+		int offsetX = i * 4;
+
+		vPBYTE colors = missingTextureBytes + offsetX + offsetY;
+
+		/* set blue and green components to 0 */
+		colors[1] = 0;
+		colors[2] = 0;
+	}
+
+	/* pass byte data to openGL */
+	glGenTextures(1, &_vgfx.defaultShaderData.missingTexture);
+	glBindTexture(GL_TEXTURE_2D, _vgfx.defaultShaderData.missingTexture);
+	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGBA, 
+		missingTextureSize, missingTextureSize, ZERO, GL_RGBA,
+		GL_UNSIGNED_BYTE, missingTextureBytes);
+
+	vLogInfoFormatted(__func__, "Generated default texture object. OpenGL error: %d.",
+		glGetError());
+
+	/* forced wrap filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	/* forced linear filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	vFree(missingTextureBytes);
+}
+
 static void vhGSetupDefaultShaderData(void)
 {
 	vPGDefaultShaderData shaderData = &_vgfx.defaultShaderData;
@@ -121,28 +167,8 @@ static void vhGSetupDefaultShaderData(void)
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	/* initialize default texture */
-	size_t allocSize = sizeof(vBYTE) * 4 * 4 * 4;
-	vPBYTE missingTextureBytes = vAlloc(allocSize);
-	__stosb(missingTextureBytes, 255, allocSize);
-
-	glGenTextures(1, &_vgfx.defaultShaderData.missingTexture);
-	glBindTexture(GL_TEXTURE_2D, _vgfx.defaultShaderData.missingTexture);
-	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGBA, 4, 4, ZERO, GL_RGBA,
-		GL_UNSIGNED_BYTE, missingTextureBytes);
-
-	vLogInfoFormatted(__func__, "Generated default texture object. OpenGL error: %d.",
-		glGetError());
-
-	/* forced wrap filter */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	/* forced linear filter */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	vFree(missingTextureBytes);
+	/* setup missing texture object */
+	vhGSetupMissingTexture();
 }
 
 
