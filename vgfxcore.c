@@ -46,10 +46,10 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 
 	/* initialize buffers */
 	_vgfx.skinList = vCreateBuffer("vGFX Skin List", sizeof(vGSkin), SKINS_MAX,
-		NULL, NULL, NULL);
+		NULL, NULL);
 
 	_vgfx.shaderList = vCreateBuffer("vGFX Shader List", sizeof(vGShader), SHADERS_MAX,
-		NULL, NULL, NULL);
+		NULL, NULL);
 
 	_vgfx.renderableList = vCreateDBuffer("vGFX Renderable List", sizeof(vPGRenderable),
 		RENDERABLE_LIST_NODE_SIZE, vGRenderableList_initFunc, NULL);
@@ -88,10 +88,10 @@ VGFXAPI vGRect vGCreateRect(float left, float right, float bottom, float top)
 VGFXAPI vGRect vGCreateRectCentered(float width, float height)
 {
 	vGRect rect;
-	rect.left   = -width / 2.0;
-	rect.right  =  width / 2.0;
-	rect.bottom = -height / 2.0;
-	rect.top    =  height / 2.0;
+	rect.left   = -width / 2.0f;
+	rect.right  =  width / 2.0f;
+	rect.bottom = -height / 2.0f;
+	rect.top    =  height / 2.0f;
 	return rect;
 }
 
@@ -109,8 +109,8 @@ VGFXAPI void vGUnlock(void)
 
 
 /* ========== RENDERABLE ATTACHMENT				==========	*/
-VGFXAPI void vGCreateRenderable(vPObject object, vPGShader shader, vPGSkin skin
-	, vGRect rect)
+VGFXAPI vPGRenderable vGCreateRenderable(vPObject object, vPGShader shader, 
+	vPGSkin skin, vGRect rect)
 {
 	vPGRenderable input = vAllocZeroed(sizeof(vGRenderable));
 	input->shader = shader;
@@ -119,6 +119,8 @@ VGFXAPI void vGCreateRenderable(vPObject object, vPGShader shader, vPGSkin skin
 
 	/* refer to vgfxrenderable.c for input behavior */
 	vObjectAddComponent(object, _vgfx.renderableHandle, input);
+
+	return input;
 }
 
 VGFXAPI void vGDestroyRenderable(vPObject object)

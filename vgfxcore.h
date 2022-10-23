@@ -20,7 +20,8 @@ VGFXAPI void vGUnlock(void);
 
 
 /* ========== RENDERABLE ATTACHMENT				==========	*/
-VGFXAPI void vGCreateRenderable(vPObject object, vPGShader shader, vPGSkin skin, vGRect rect);
+VGFXAPI vPGRenderable vGCreateRenderable(vPObject object, vPGShader shader, 
+	vPGSkin skin, vGRect rect);
 VGFXAPI void vGDestroyRenderable(vPObject object);
 
 

@@ -36,7 +36,7 @@ static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
 		GLsizei writeLength; /* unused */
 
 		/* get error message */
-		GLchar  errorBuff = vAllocZeroed(BUFF_MASSIVE);
+		GLchar* errorBuff = vAllocZeroed(BUFF_MASSIVE);
 		glGetShaderInfoLog(shaderID, sizeof(errorBuff), &writeLength, errorBuff);
 
 		/* create err file name */
@@ -79,7 +79,7 @@ static GLuint vhGCreateProgram(GLuint vert, GLuint frag)
 		vLogError(__func__, "Shader program failed to link.");
 		vCHAR errorBuffer[BUFF_LARGE];
 		glGetProgramInfoLog(shaderProgramID, sizeof(errorBuffer), NULL, errorBuffer);
-		vLogError(__func__, errorBuffer);
+		vLogErrorFormatted(__func__, "Link error msg: '%s'.", errorBuffer);
 		return ZERO;
 	}
 
@@ -295,8 +295,6 @@ void vGRT_exitFunc(vPWorker worker, vPTR workerData)
 
 void vGRT_cycleFunc(vPWorker worker, vPTR workerData)
 {
-	printf("running...\n");
-
 	vGLock();
 
 	/* update window messaging system */

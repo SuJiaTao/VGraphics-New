@@ -19,7 +19,12 @@ static vPCHAR vGShader_errVert =
 	"layout (location = 4) uniform mat4 v_texture;\n"
 	"\n"
 	"out vec2 f_textureUV;\n"
-	"\n";
+	"\n"
+	"void main()\n"
+	"{\n"
+	"\tf_color = v_color;\n"
+	"\tgl_Position = v_projectionMatrix * v_modelMatrix * vec4(v_position, 0.0, 1.0);\t\t\n"
+	"}";
 
 static vPCHAR vGShader_errFrag =
 	"#version 460 core\n"

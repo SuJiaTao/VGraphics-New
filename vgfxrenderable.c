@@ -19,7 +19,6 @@ void vGRenderable_initFunc(vPObject object, vPComponent component, vPTR input)
 	/* setup metadata */
 	vPGRenderable renderableData = component->objectAttribute;
 	renderableData->objectPtr = object;
-	printf("objectPtr -> %p\n", renderableData->objectPtr);
 
 	/* setup render-related members */
 	renderableData->rect   = inputCopy->rect;
