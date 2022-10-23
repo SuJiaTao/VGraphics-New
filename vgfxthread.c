@@ -216,7 +216,7 @@ void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable* element,
 
 	LONG width  = _vgfx.window.dimensions.right   - _vgfx.window.dimensions.left;
 	LONG height = _vgfx.window.dimensions.bottom  - _vgfx.window.dimensions.top;
-	float aspect = (float)height / (float)width;
+	float aspect = (float)width / (float)height;
 
 	glViewport(0, 0, width, height);
 	glOrtho(-aspect, aspect, -1, 1, -1, 1);

@@ -77,13 +77,19 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	/* lastly move rect around */
 	glTranslatef(object->transform.position.x, object->transform.position.y,
 		(float)renderData->layer / 255.0f);
 	glRotatef(object->transform.rotation, 0.0f, 0.0f, 1.0f);
 	glScalef(object->transform.scale, object->transform.scale, 1.0f);
 
+	/* firstly, adjust rect to be right size */
+	glScalef(renderData->rect.right - renderData->rect.left,
+		renderData->rect.top - renderData->rect.bottom, 1.0f);
+	glTranslatef(renderData->rect.left, renderData->rect.bottom, 1.0f);
+
 	/* setup skin (if it exists) */
-	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
 	if (renderData->skin != NULL)
 	{
