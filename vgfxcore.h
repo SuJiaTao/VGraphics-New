@@ -34,5 +34,11 @@ VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
 VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount,
 	vPCHAR fileName);
 VGFXAPI void vGDestroySkin(vPGSkin skin);
+VGFXAPI vGRect vGCreateRect(float left, float right, float bottom, float top);
+VGFXAPI vGRect vGCreateRectCentered(float widht, float height);
+
+
+/* ========== INTERNALS							==========	*/
+VGFXAPI _vPGInternals vGGetInternals(void);
 
 #endif

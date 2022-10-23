@@ -116,6 +116,11 @@ static void vhGSetupDefaultShaderData(void)
 	/* setup vertex attributes */
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	/* initialize default texture */
+	vPBYTE flatSkinByteData[4] = { 255, 255, 255, 255 };
+	_vgfx.defaultShaderData.flatSkin =
+		vGCreateSkinFromBytes(1, 1, 0, flatSkinByteData);
 }
 
 
@@ -187,12 +192,19 @@ static LRESULT CALLBACK vGWindowProc(HWND window, UINT message,
 
 
 /* ========== RENDERABLE DRAW FUNCTION			==========	*/
-void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable renderable,
+void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable* element,
 	vPTR input)
 {
+	/* pointer to element is passed to this function		*/
+	/* element itself is a pointer to a renderable object	*/
+	vPGRenderable renderable = *element;
+
 	vPGShader shader = renderable->shader;
 
-	/* ensure shader exists */
+	/* ensure shader doesn't exist, use err shader */
+	if (shader == NULL) shader = _vgfx.defaultShaders.errShader;
+
+	/* if in FAILED state, abort draw call */
 	if (shader == NULL) return;
 	
 	/* bind to shader handle */
@@ -283,6 +295,8 @@ void vGRT_exitFunc(vPWorker worker, vPTR workerData)
 
 void vGRT_cycleFunc(vPWorker worker, vPTR workerData)
 {
+	printf("running...\n");
+
 	vGLock();
 
 	/* update window messaging system */

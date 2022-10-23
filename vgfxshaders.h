@@ -11,6 +11,8 @@
 
 
 /* ========== ERROR SHADER						==========	*/
+vPCHAR vGShader_errRenderGetVert(void);
+vPCHAR vGShader_errRenderGetFrag(void);
 void vGShader_errRender(vPGShader shader, vPTR unused,
 	vPObject object, vPGRenderable renderData);
 

@@ -21,13 +21,15 @@ static void vhGValidateHeap(const char* message)
 
 
 /* ========== BUFFER CALLBACKS					==========	*/
-static void vGRenderableList_initFunc(vHNDL buffer, vPTR element, 
+static void vGRenderableList_initFunc(vHNDL buffer, vPGRenderable* element,
 	vPGRenderable input)
 {
-	vPGRenderable* renderablePtr = element;
+	/* each element holds a pointer to a renderable object */
+	/* a pointer to the element is passed to this function */
+	/* therefore element is a renderable 2xpointer		   */
 
 	/* set element to hold pointer to component's renderable object attribute */
-	*renderablePtr = input;
+	*element = input;
 
 	/* set renderable to point back to element (for deletion later) */
 	input->internalStoredPtr = element;
@@ -50,7 +52,7 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 		NULL, NULL, NULL);
 
 	_vgfx.renderableList = vCreateDBuffer("vGFX Renderable List", sizeof(vPGRenderable),
-		RENDERABLE_LIST_NODE_SIZE, NULL, NULL);
+		RENDERABLE_LIST_NODE_SIZE, vGRenderableList_initFunc, NULL);
 
 	/* MAKE COPY OF INIT DATA ON HEAP FOR THREAD PERSISTENCE */
 	vPGInitializeData heapDataCopy = vAllocZeroed(sizeof(vGInitializeData));
@@ -65,6 +67,32 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 	/* create renderable behavior */
 	_vgfx.renderableHandle = vCreateComponent("vGFX Renderable", ZERO, sizeof(vGRenderable),
 		NULL, vGRenderable_initFunc, vGRenderable_destroyFunc, NULL, _vgfx.workerThread);
+
+	/* setup default shaders */
+	_vgfx.defaultShaders.errShader =
+		vGCreateShader(NULL, vGShader_errRender, NULL,
+			NULL, vGShader_errRenderGetVert(), vGShader_errRenderGetFrag(), NULL);
+
+}
+
+VGFXAPI vGRect vGCreateRect(float left, float right, float bottom, float top)
+{
+	vGRect rect;
+	rect.left = left;
+	rect.right = right;
+	rect.bottom = bottom;
+	rect.top = top;
+	return rect;
+}
+
+VGFXAPI vGRect vGCreateRectCentered(float width, float height)
+{
+	vGRect rect;
+	rect.left   = -width / 2.0;
+	rect.right  =  width / 2.0;
+	rect.bottom = -height / 2.0;
+	rect.top    =  height / 2.0;
+	return rect;
 }
 
 
@@ -274,4 +302,11 @@ VGFXAPI void vGDestroySkin(vPGSkin skin)
 	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
 
 	vBufferRemove(_vgfx.skinList, skin);
+}
+
+
+/* ========== INTERNALS							==========	*/
+VGFXAPI _vPGInternals vGGetInternals(void)
+{
+	return &_vgfx;
 }

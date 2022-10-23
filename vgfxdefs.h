@@ -69,10 +69,10 @@ typedef struct vGSkin
 
 typedef struct vGRect
 {
-	float bottomLeft;
-	float bottomRight;
-	float topLeft;
-	float topRight;
+	float left;
+	float right;
+	float bottom;
+	float top;
 } vGRect, *vPGRect;
 
 typedef struct vGColor
@@ -137,8 +137,9 @@ typedef struct vGInitializeData
 /* ========== MODULE INTERNALS					==========	*/
 typedef struct vGDefaultShaderData
 {
-	GLuint vertexAttribute;	/* vertex descriptor of buffer	*/
-	GLuint baseRect;	/* vert buffer of basic rectangle	*/
+	GLuint  vertexAttribute;	/* vertex descriptor of buffer	*/
+	GLuint  baseRect;	/* vert buffer of basic rectangle		*/
+	vPGSkin flatSkin;	/* 1 pixel white texture				*/
 } vGDefaultShaderData, *vPGDefaultShaderData;
 
 typedef struct vGDefaultShaders
