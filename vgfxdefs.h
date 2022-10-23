@@ -137,9 +137,9 @@ typedef struct vGInitializeData
 /* ========== MODULE INTERNALS					==========	*/
 typedef struct vGDefaultShaderData
 {
-	GLuint  vertexAttribute;	/* vertex descriptor of buffer	*/
-	GLuint  baseRect;	/* vert buffer of basic rectangle		*/
-	vPGSkin flatSkin;	/* 1 pixel white texture				*/
+	GLuint vertexAttribute;	/* vertex descriptor of buffer		*/
+	GLuint baseRect;		/* vert buffer of basic rectangle	*/
+	GLuint missingTexture;	/* fallback texture					*/
 } vGDefaultShaderData, *vPGDefaultShaderData;
 
 typedef struct vGDefaultShaders

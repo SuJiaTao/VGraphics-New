@@ -9,6 +9,7 @@
 #include "vgfx.h"
 #include "vgfxthread.h"
 #include "vgfxshaders.h"
+#include <intrin.h>
 #include <stdio.h>
 
 
@@ -21,7 +22,10 @@ static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
 	GLuint shaderID = glCreateShader(shaderType);
 
 	/* assign source and compile */
-	glShaderSource(shaderID, 1, &source, ZERO);
+	vI32 srcLength = strlen(source);
+	vLogInfoFormatted(__func__, "Passing source of length %d to openGL.",
+		srcLength);
+	glShaderSource(shaderID, 1, &source, &srcLength);
 	glCompileShader(shaderID);
 
 	/* ensure shader compiled properly */
@@ -118,9 +122,27 @@ static void vhGSetupDefaultShaderData(void)
 	glEnableVertexAttribArray(0);
 
 	/* initialize default texture */
-	vPBYTE flatSkinByteData[4] = { 255, 255, 255, 255 };
-	_vgfx.defaultShaderData.flatSkin =
-		vGCreateSkinFromBytes(1, 1, 0, flatSkinByteData);
+	size_t allocSize = sizeof(vBYTE) * 4 * 4 * 4;
+	vPBYTE missingTextureBytes = vAlloc(allocSize);
+	__stosb(missingTextureBytes, 255, allocSize);
+
+	glGenTextures(1, &_vgfx.defaultShaderData.missingTexture);
+	glBindTexture(GL_TEXTURE_2D, _vgfx.defaultShaderData.missingTexture);
+	glTexImage2D(GL_TEXTURE_2D, ZERO, GL_RGBA, 4, 4, ZERO, GL_RGBA,
+		GL_UNSIGNED_BYTE, missingTextureBytes);
+
+	vLogInfoFormatted(__func__, "Generated default texture object. OpenGL error: %d.",
+		glGetError());
+
+	/* forced wrap filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	/* forced linear filter */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	vFree(missingTextureBytes);
 }
 
 
@@ -387,6 +409,9 @@ void vGRT_createSkinTask(vPWorker worker, vPTR workerData, vPGRT_CSkinInput inpu
 	/* forced linear filter */
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	vLogInfoFormatted(__func__, "Generated skin. OpenGL error: %d.",
+		glGetError());
 
 	/* FREE INPUT */
 	vFree(input);

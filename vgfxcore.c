@@ -72,7 +72,12 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 	_vgfx.defaultShaders.errShader =
 		vGCreateShader(NULL, vGShader_errRender, NULL,
 			NULL, vGShader_errRenderGetVert(), vGShader_errRenderGetFrag(), NULL);
+	_vgfx.defaultShaders.rectShader =
+		vGCreateShader(NULL, vGShader_rectRender, NULL,
+			NULL, vGShader_rectRenderGetVert(), vGShader_rectRenderGetFrag(), NULL);
 
+	/* DUMP ALL INFO */
+	vDumpEntryBuffer();
 }
 
 VGFXAPI vGRect vGCreateRect(float left, float right, float bottom, float top)
@@ -116,11 +121,13 @@ VGFXAPI vPGRenderable vGCreateRenderable(vPObject object, vPGShader shader,
 	input->shader = shader;
 	input->skin = skin;
 	input->rect = rect;
+	input->tint = vGCreateColorF(1.0f, 1.0f, 1.0f, 1.0f);
 
 	/* refer to vgfxrenderable.c for input behavior */
-	vObjectAddComponent(object, _vgfx.renderableHandle, input);
+	vPComponent renderComponent = 
+		vObjectAddComponent(object, _vgfx.renderableHandle, input);
 
-	return input;
+	return renderComponent->objectAttribute;
 }
 
 VGFXAPI void vGDestroyRenderable(vPObject object)
@@ -304,6 +311,26 @@ VGFXAPI void vGDestroySkin(vPGSkin skin)
 	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
 
 	vBufferRemove(_vgfx.skinList, skin);
+}
+
+VGFXAPI vGColor vGCreateColorF(float r, float g, float b, float a)
+{
+	vGColor rColor;
+	rColor.R = r;
+	rColor.G = g;
+	rColor.B = b;
+	rColor.A = a;
+	return rColor;
+}
+
+VGFXAPI vGColor vGCreateColorB(vBYTE r, vBYTE g, vBYTE b, vBYTE a)
+{
+	vGColor color;
+	color.R = (float)r / 255.0;
+	color.G = (float)g / 255.0;
+	color.B = (float)b / 255.0;
+	color.A = (float)a / 255.0;
+	return color;
 }
 
 
