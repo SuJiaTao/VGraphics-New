@@ -98,22 +98,29 @@ static void vhGSetupMissingTexture(void)
 	/* allocate memory for missing texture data */
 	SIZE_T allocSize = 
 		sizeof(vBYTE) * missingTextureSize * missingTextureSize * 4;
-	vPBYTE missingTextureBytes = vAlloc(allocSize);
+	vPBYTE missingTextureBytes = vAllocZeroed(allocSize);
 
-	/* set all values to 255 */
-	__stosb(missingTextureBytes, 255, allocSize); 
-
-	/* generate diagonal red line */
-	for (int i = 0; i < missingTextureSize; i++)
+	/* generate missing texture pattern */
+	for (int x = 0; x < missingTextureSize; x++)
 	{
-		int offsetY = i * missingTextureSize * 4;
-		int offsetX = i * 4;
+		for (int y = 0; y < missingTextureSize; y++)
+		{
+			/* diagonal walk */
+			int offsetY = x * missingTextureSize * 4;
+			int offsetX = y * 4;
 
-		vPBYTE colors = missingTextureBytes + offsetX + offsetY;
+			/* get color component of current pixel */
+			vPBYTE colors = missingTextureBytes + offsetX + offsetY;
 
-		/* set blue and green components to 0 */
-		colors[1] = 0;
-		colors[2] = 0;
+			/* purple checkerboard */
+			if ((x + y) % 2 == 0)
+			{
+				colors[0] = 255;
+				colors[2] = 255;
+			}
+			colors[3] = 255;
+		}
+		
 	}
 
 	/* pass byte data to openGL */
