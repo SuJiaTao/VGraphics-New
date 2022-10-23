@@ -133,9 +133,9 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 	glScalef(object->transform.scale, object->transform.scale, 1.0f);
 
 	/* firstly, adjust rect to be right size */
+	glTranslatef(renderData->rect.left, renderData->rect.bottom, 1.0f);
 	glScalef(renderData->rect.right - renderData->rect.left,
 		renderData->rect.top - renderData->rect.bottom, 1.0f);
-	glTranslatef(renderData->rect.left, renderData->rect.bottom, 1.0f);
 
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
