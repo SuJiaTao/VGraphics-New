@@ -68,6 +68,9 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 	_vgfx.renderableHandle = vCreateComponent("vGFX Renderable", ZERO, sizeof(vGRenderable),
 		NULL, vGRenderable_initFunc, vGRenderable_destroyFunc, NULL, _vgfx.workerThread);
 
+	/* setup default camera transform */
+	vGCameraSetTransform(vCreateTransformF(0.0f, 0.0f, 0.0f, 1.0f));
+
 	/* setup default shaders */
 	_vgfx.defaultShaders.errShader =
 		vGCreateShader(NULL, vGShader_errRender, NULL,
@@ -335,6 +338,53 @@ VGFXAPI vGColor vGCreateColorB(vBYTE r, vBYTE g, vBYTE b, vBYTE a)
 }
 
 
+/* ========== CAMERA MANIPULATION				==========	*/
+VGFXAPI vTransform vGCameraGetTransform(void) 
+{
+	return _vgfx.cameraTransform.stack[_vgfx.cameraTransform.ptr];
+}
+
+VGFXAPI vPTransform vGCameraGetTransformPTR(void)
+{
+	return _vgfx.cameraTransform.stack + _vgfx.cameraTransform.ptr;
+}
+
+VGFXAPI void  vGCameraSetTransform(vTransform transform)
+{
+	_vgfx.cameraTransform.stack[_vgfx.cameraTransform.ptr] = transform;
+}
+
+VGFXAPI vBOOL vGCameraPush(void)
+{
+	/* ensure not stack overflow */
+	if (_vgfx.cameraTransform.ptr >= CAMERA_TRANSFORM_STACK_SIZE - 1) return FALSE;
+
+	/* increase stack ptr and clear camera transform */
+	_vgfx.cameraTransform.ptr++;
+	vGCameraSetTransform(vCreateTransformF(0.0f, 0.0f, 0.0f, 1.0f));
+
+	return TRUE;
+}
+
+VGFXAPI vBOOL vGCameraPop(vPTransform prevCamera)
+{
+	/* ensure not stack underflow */
+	if (_vgfx.cameraTransform.ptr == ZERO) return FALSE;
+
+	/* if user wants previous camera value, give it */
+	if (prevCamera != NULL)
+		*prevCamera = vGCameraGetTransform();
+
+	/* decrement stack ptr (NO CLEAR, LAST TRANSFORM IS PRESERVED) */
+	_vgfx.cameraTransform.ptr--;
+}
+
+VGFXAPI vUI32 vGCameraGetPointer(void)
+{
+	return _vgfx.cameraTransform.ptr;
+}
+
+
 /* ========== DEFAULT VALUES					==========	*/
 VGFXAPI vPGShader vGGetDefaultShader(vGDefaultShader shaderType)
 {
@@ -352,6 +402,11 @@ VGFXAPI vPGShader vGGetDefaultShader(vGDefaultShader shaderType)
 
 	vLogError(__func__, "Tried to retrieve invalid default shader type.");
 	return NULL;
+}
+
+VGFXAPI vPGDefaultShaderData vGGetDefaultShaderData(void)
+{
+	return &_vgfx.defaultShaderData;
 }
 
 

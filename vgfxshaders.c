@@ -38,7 +38,7 @@ static vPCHAR vGShader_errFrag =
 	"\t}\n"
 	"\telse\n"
 	"\t{\n"
-	"\t\tgl_FragColor = vec4(0.937, 0.733, 0.4, 1.0);\n"
+	"\t\tgl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
 	"\t}\n"
 	"}";
 
@@ -122,6 +122,15 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 	vPGDefaultShaderData shaderData = &_vgfx.defaultShaderData;
 
 	/* projection matrix is already setup (refer to vgfxthread.c) */
+	/* apply camera transforms									  */
+	glMatrixMode(GL_PROJECTION);
+
+	vTransform cameraTransform = vGCameraGetTransform();
+	glRotatef(-cameraTransform.rotation, 0.0f, 0.0f, 1.0f);
+	glTranslatef(cameraTransform.position.x, cameraTransform.position.y,
+		0.0f);
+	glScalef(cameraTransform.scale, cameraTransform.scale, 1.0f);
+
 	/* setup modelview matrix									  */
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

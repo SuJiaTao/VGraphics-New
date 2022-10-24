@@ -41,8 +41,18 @@ VGFXAPI vGColor vGCreateColorF(float r, float g, float b, float a);
 VGFXAPI vGColor vGCreateColorB(vBYTE r, vBYTE g, vBYTE b, vBYTE a);
 
 
+/* ========== CAMERA MANIPULATION				==========	*/
+VGFXAPI vTransform  vGCameraGetTransform(void);
+VGFXAPI vPTransform vGCameraGetTransformPTR(void);
+VGFXAPI void  vGCameraSetTransform(vTransform transform);
+VGFXAPI vBOOL vGCameraPush(void);
+VGFXAPI vBOOL vGCameraPop(vPTransform prevCamera);
+VGFXAPI vUI32 vGCameraGetPointer(void);
+
+
 /* ========== DEFAULT VALUES					==========	*/
 VGFXAPI vPGShader vGGetDefaultShader(vGDefaultShader shaderType);
+VGFXAPI vPGDefaultShaderData vGGetDefaultShaderData(void);
 
 
 /* ========== INTERNALS							==========	*/

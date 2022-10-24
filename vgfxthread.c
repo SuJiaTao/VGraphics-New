@@ -110,15 +110,15 @@ static void vhGSetupMissingTexture(void)
 			int offsetX = y * 4;
 
 			/* get color component of current pixel */
-			vPBYTE colors = missingTextureBytes + offsetX + offsetY;
+			vBYTE* pixelColor = missingTextureBytes + offsetX + offsetY;
+			vBYTE  patternColor[4] = { 255, 0, 255, 255 };
 
-			/* purple checkerboard */
+			/* checker pattern */
 			if ((x + y) % 2 == 0)
 			{
-				colors[0] = 255;
-				colors[2] = 255;
+				vMemCopy(pixelColor, patternColor, sizeof(patternColor));
 			}
-			colors[3] = 255;
+			pixelColor[3] = 255;
 		}
 		
 	}

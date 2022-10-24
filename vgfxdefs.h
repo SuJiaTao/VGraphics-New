@@ -28,6 +28,8 @@
 #define WINDOW_WIDTH_MIN	0x180
 #define WINDOW_HEIGHT_MIN	0x180
 
+#define CAMERA_TRANSFORM_STACK_SIZE	0x80
+
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
 #define VGFX_COLOR_1b  77,  19, 109
@@ -149,6 +151,12 @@ typedef struct vGDefaultShaders
 	vPGShader rectShader;
 } vGDefaultShaders, *vPGDefaultShaders;
 
+typedef struct vGCameraTransformStack 
+{
+	vTransform stack[CAMERA_TRANSFORM_STACK_SIZE];
+	vUI32	   ptr;
+} vGCameraTransformStack, *vPGCameraTransformStack;
+
 typedef struct _vGInternals
 {
 	CRITICAL_SECTION lock;
@@ -168,7 +176,8 @@ typedef struct _vGInternals
 	vGDefaultShaderData defaultShaderData;
 	vGDefaultShaders defaultShaders;
 
-
+	/* camera transform */
+	vGCameraTransformStack cameraTransform;
 } _vGInternals, *_vPGInternals;
 
 _vGInternals _vgfx;	/* INSTANCE */
