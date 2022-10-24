@@ -57,9 +57,12 @@ static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
 		vFree(errorBuff);
 		vFree(errfileName);
 
+		vCoreFatalError(__func__, 
+			"Failed to compiled shader. Please check shader error logs.");
 		return ZERO;
 	}
 
+	vDumpEntryBuffer();
 	return shaderID;
 }
 
@@ -84,6 +87,8 @@ static GLuint vhGCreateProgram(GLuint vert, GLuint frag)
 		vCHAR errorBuffer[BUFF_LARGE];
 		glGetProgramInfoLog(shaderProgramID, sizeof(errorBuffer), NULL, errorBuffer);
 		vLogErrorFormatted(__func__, "Link error msg: '%s'.", errorBuffer);
+
+		vCoreFatalError(__func__, "Failed to link shader program. Check logfile for details.");
 		return ZERO;
 	}
 
@@ -388,7 +393,7 @@ void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CShaderInput 
 	/* compile vertex shader */
 	vLogInfo(__func__, "Compiling vertex shader.");
 	GLuint vertShader = vhGCompileShader(GL_VERTEX_SHADER, input->vertexSrc);
-
+	
 	/* compile fragment shader */
 	vLogInfo(__func__, "Compiling fragment shader.");
 	GLuint fragShader = vhGCompileShader(GL_FRAGMENT_SHADER, input->fragSrc);

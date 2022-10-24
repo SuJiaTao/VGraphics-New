@@ -174,6 +174,8 @@ typedef struct _vGInternals
 
 	/* default shader metadata */
 	vGDefaultShaderData defaultShaderData;
+
+	/* default shaders */
 	vGDefaultShaders defaultShaders;
 
 	/* camera transform */
