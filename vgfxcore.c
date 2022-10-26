@@ -35,6 +35,13 @@ static void vGRenderableList_initFunc(vHNDL buffer, vPGRenderable* element,
 	input->internalStoredPtr = element;
 }
 
+static void vGExitCallbackList_initFunc(vHNDL buffer, vUI16 index,
+	vPFBUFFERINITIALIZEELEMENT* element, vPFBUFFERINITIALIZEELEMENT input)
+{
+	/* we are passed a pointer to the element	*/
+	/* each element is a fptr to callback		*/
+	*element = input;
+}
 
 /* ========== INITIALIZATION					==========	*/
 VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
@@ -53,6 +60,9 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 
 	_vgfx.renderableList = vCreateDBuffer("vGFX Renderable List", sizeof(vPGRenderable),
 		RENDERABLE_LIST_NODE_SIZE, vGRenderableList_initFunc, NULL);
+
+	_vgfx.exitCallbackList = vCreateBuffer("vGFX Exit Callback List", sizeof(vPFGEXITCALLBACK),
+		EXIT_CALLBACK_LIST_SIZE, vGExitCallbackList_initFunc, NULL);
 
 	/* MAKE COPY OF INIT DATA ON HEAP FOR THREAD PERSISTENCE */
 	vPGInitializeData heapDataCopy = vAllocZeroed(sizeof(vGInitializeData));
@@ -407,6 +417,27 @@ VGFXAPI vPGShader vGGetDefaultShader(vGDefaultShader shaderType)
 VGFXAPI vPGDefaultShaderData vGGetDefaultShaderData(void)
 {
 	return &_vgfx.defaultShaderData;
+}
+
+
+/* ========== EXIT RELATED						==========	*/
+VGFXAPI void vGAttatchExitCallback(vPFGEXITCALLBACK exitFunc)
+{
+	vBufferAdd(_vgfx.exitCallbackList, exitFunc);
+}
+
+VGFXAPI void vGExit(void)
+{
+	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
+	/* ONLY THREADS OWNING A WINDOW CAN DESTROY THE WINDOW			*/
+	vTIME syncTick =
+		vWorkerDispatchTask(_vgfx.workerThread, vGRT_destroyWindowTask, NULL);
+	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
+}
+
+VGFXAPI vBOOL vGExited(void)
+{
+	return vWorkerIsAlive(_vgfx.workerThread) == FALSE;
 }
 
 

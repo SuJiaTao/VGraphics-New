@@ -28,7 +28,11 @@
 #define WINDOW_WIDTH_MIN	0x180
 #define WINDOW_HEIGHT_MIN	0x180
 
-#define CAMERA_TRANSFORM_STACK_SIZE	0x80
+#define CAMERA_TRANSFORM_STACK_SIZE	0x20
+
+#define EXIT_CALLBACK_LIST_SIZE		0x100
+
+#define VGFX_WINDOW_CLASS_NAME		"vGFX Window Class"
 
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
@@ -49,6 +53,7 @@ typedef void (*vPFGSHADERINIT)(struct vGShader* shader, vPTR shaderData, vPTR in
 typedef void (*vPFGSHADERRENDER)(struct vGShader* shader, vPTR shaderData, 
 	struct vObject* object, struct vGRenderable* renderData);
 typedef void (*vPFGSHADEREXIT)(struct vGShader* shader, vPTR shaderData);
+typedef void (*vPFGEXITCALLBACK)(void);
 
 
 /* ========== ENUMS								==========	*/
@@ -171,6 +176,8 @@ typedef struct _vGInternals
 	vHNDL skinList;				/* static list of all skins	  */
 
 	vHNDL renderableList;		/* dynamic list of all renderable objects */
+
+	vHNDL exitCallbackList;		/* static list of exit callbacks */
 
 	/* default shader metadata */
 	vGDefaultShaderData defaultShaderData;

@@ -14,6 +14,12 @@
 
 
 /* ========== HELPER							==========	*/
+static void vhGThreadValidateMemory(void)
+{
+	vPTR ptr = vAlloc(0x100);
+	vFree(ptr);
+}
+
 static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
 {
 	vLogInfo(__func__, "Started Compiling Shader.");
@@ -64,6 +70,13 @@ static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
 
 	vDumpEntryBuffer();
 	return shaderID;
+}
+
+static void vhGExitCallbackList_iterateFunc(vHNDL buffer, vUI16 index,
+	vPFGEXITCALLBACK* callbackPtr, vPTR input)
+{
+	vPFGEXITCALLBACK func = *callbackPtr;
+	func();
 }
 
 static GLuint vhGCreateProgram(GLuint vert, GLuint frag)
@@ -243,6 +256,22 @@ static LRESULT CALLBACK vGWindowProc(HWND window, UINT message,
 		}
 
 		break;
+
+	/* CLOSE CALLBACK */
+	case WM_DESTROY:
+
+		/* run destruction callbacks */
+		vBufferIterate(_vgfx.exitCallbackList, vhGExitCallbackList_iterateFunc, NULL);
+
+		/* free DC */
+		wglDeleteContext(_vgfx.window.renderingContext);
+		ReleaseDC(_vgfx.window.window, _vgfx.window.deviceContext);
+		UnregisterClassA(VGFX_WINDOW_CLASS_NAME, NULL);
+
+		/* delete thread */
+		vDestroyWorker(_vgfx.workerThread);
+
+		break;
 	}
 
 	/* call default window proc (as defined by win32) */
@@ -262,9 +291,6 @@ void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable* element,
 
 	/* ensure shader doesn't exist, use err shader */
 	if (shader == NULL) shader = _vgfx.defaultShaders.errShader;
-
-	/* if in FAILED state, abort draw call */
-	if (shader == NULL) return;
 	
 	/* bind to shader handle */
 	glUseProgram(shader->glProgramHandle);
@@ -300,7 +326,7 @@ void vGRT_initFunc(vPWorker worker, vPTR workerData,
 	WNDCLASSA wClass;
 	vZeroMemory(&wClass, sizeof(WNDCLASSA));
 	wClass.lpfnWndProc   = vGWindowProc;
-	wClass.lpszClassName = "vGFX Window Class";
+	wClass.lpszClassName = VGFX_WINDOW_CLASS_NAME;
 	
 	ATOM result = RegisterClassA(&wClass);
 	if (result == INVALID_ATOM)
@@ -352,7 +378,7 @@ void vGRT_initFunc(vPWorker worker, vPTR workerData,
 
 void vGRT_exitFunc(vPWorker worker, vPTR workerData)
 {
-
+	
 }
 
 void vGRT_cycleFunc(vPWorker worker, vPTR workerData)
@@ -403,6 +429,10 @@ void vGRT_createShaderTask(vPWorker worker, vPTR workerData, vPGRT_CShaderInput 
 	input->shader->glFragHandle = fragShader;
 	input->shader->glProgramHandle = vhGCreateProgram(vertShader,
 		fragShader);
+
+	/* flag shaders for deletion (openGL will delete once program is destroyed) */
+	glDeleteShader(input->shader->glVertHandle);
+	glDeleteShader(input->shader->glFragHandle);
 
 	/* call initialization */
 	vPGShader shader = input->shader;
@@ -465,4 +495,15 @@ void vGRT_createSkinTask(vPWorker worker, vPTR workerData, vPGRT_CSkinInput inpu
 void vGRT_destroySkinTask(vPWorker worker, vPTR workerData, vPGSkin input)
 {
 	glDeleteTextures(1, &input->glHandle);
+}
+
+void vGRT_destroyWindowTask(vPWorker worker, vPTR workerData, vPTR unused)
+{
+	BOOL destroyResult = DestroyWindow(_vgfx.window.window);
+	if (destroyResult == FALSE)
+	{
+		vLogErrorFormatted(__func__, "Failed to destroy window with error code [%d].",
+			GetLastError());
+		vCoreFatalError(__func__, "Window destruction failed");
+	}
 }

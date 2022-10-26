@@ -55,6 +55,12 @@ VGFXAPI vPGShader vGGetDefaultShader(vGDefaultShader shaderType);
 VGFXAPI vPGDefaultShaderData vGGetDefaultShaderData(void);
 
 
+/* ========== EXIT RELATED						==========	*/
+VGFXAPI void vGAttatchExitCallback(vPFGEXITCALLBACK exitFunc);
+VGFXAPI void vGExit(void);
+VGFXAPI vBOOL vGExited(void);
+
+
 /* ========== INTERNALS							==========	*/
 VGFXAPI _vPGInternals vGGetInternals(void);
 

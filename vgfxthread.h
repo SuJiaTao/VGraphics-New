@@ -33,6 +33,7 @@ typedef struct vGRT_CSkinInput
 } vGRT_CSkinInput, *vPGRT_CSkinInput;
 void vGRT_createSkinTask(vPWorker worker, vPTR workerData, vPGRT_CSkinInput input);
 void vGRT_destroySkinTask(vPWorker worker, vPTR workerData, vPGSkin input);
+void vGRT_destroyWindowTask(vPWorker worker, vPTR workerData, vPTR unused);
 
 
 
