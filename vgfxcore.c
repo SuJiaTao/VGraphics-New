@@ -11,15 +11,6 @@
 #include "vgfxshaders.h"
 
 
-/* ========== DEBUG FUNCTIONS					==========	*/
-static void vhGValidateHeap(const char* message)
-{
-	printf("heap validation message: %s\n", message);
-	vPTR ptr = vAlloc(8);
-	vFree(ptr);
-}
-
-
 /* ========== BUFFER CALLBACKS					==========	*/
 static void vGRenderableList_initFunc(vHNDL buffer, vPGRenderable* element,
 	vPGRenderable input)
@@ -57,7 +48,7 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 
 	_vgfx.shaderList = vCreateBuffer("vGFX Shader List", sizeof(vGShader), SHADERS_MAX,
 		NULL, NULL);
-
+	
 	_vgfx.renderableList = vCreateDBuffer("vGFX Renderable List", sizeof(vPGRenderable),
 		RENDERABLE_LIST_NODE_SIZE, vGRenderableList_initFunc, NULL);
 
@@ -76,7 +67,7 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 
 	/* create renderable behavior */
 	_vgfx.renderableHandle = vCreateComponent("vGFX Renderable", ZERO, sizeof(vGRenderable),
-		NULL, vGRenderable_initFunc, vGRenderable_destroyFunc, NULL, _vgfx.workerThread);
+		NULL, vGRenderable_initFunc, vGRenderable_destroyFunc, NULL, NULL);
 
 	/* setup default camera transform */
 	vGCameraSetTransform(vCreateTransformF(0.0f, 0.0f, 0.0f, 1.0f));
@@ -158,10 +149,11 @@ VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER rende
 	/* AS IT REQUIRES AN OPENGL CONTEXT TO BE EXECUTED				*/
 
 	/* get shader object from buffer */
-	vPGShader shaderObject = vBufferAdd(_vgfx.shaderList, NULL);
-	shaderObject->initFunc = initFunc;
+	vBufferLock(_vgfx.shaderList);
+	vPGShader shaderObject   = vBufferAdd(_vgfx.shaderList, NULL);
+	shaderObject->initFunc   = initFunc;
 	shaderObject->renderFunc = renderFunc;
-	shaderObject->exitFunc = exitFunc;
+	shaderObject->exitFunc   = exitFunc;
 	shaderObject->shaderDataSizeBytes = shaderDataBytes;
 	shaderObject->shaderDataPtr = vAllocZeroed(max(4, shaderDataBytes));
 
@@ -172,6 +164,7 @@ VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER rende
 	taskInput->fragSrc   = fragmentSource;
 	taskInput->vertexSrc = vertexSource;
 	taskInput->userInput = input;
+	vBufferUnlock(_vgfx.shaderList);
 	
 	/* refer to vgfxrenderthread.c/h for input implementation */
 	vTIME syncTick = 

@@ -19,6 +19,10 @@
 #endif
 
 
+/* ========== MACROS							==========	*/
+#define vGDebugMemValidate(x)	vFree(vAlloc(x))
+
+
 /* ========== MAGIC NUMBERS						==========	*/
 #define SKINS_MAX					0x400
 #define SHADERS_MAX					0x040
