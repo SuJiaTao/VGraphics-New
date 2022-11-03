@@ -65,6 +65,10 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 		vGRT_initFunc, vGRT_exitFunc, 
 		vGRT_cycleFunc, NULL, heapDataCopy);
 
+	/* ensure the worker completes it's few cycles */
+	vWorkerWaitCycleCompletion(_vgfx.workerThread, WORKER_WARMUP_CYCLES, 
+		WORKER_WAITTIME_MAX);
+
 	/* create renderable behavior */
 	_vgfx.renderableHandle = vCreateComponent("vGFX Renderable", ZERO, sizeof(vGRenderable),
 		NULL, vGRenderable_initFunc, vGRenderable_destroyFunc, NULL, NULL);
@@ -79,6 +83,7 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 	_vgfx.defaultShaders.rectShader =
 		vGCreateShader(NULL, vGShader_rectRender, NULL,
 			NULL, vGShader_rectRenderGetVert(), vGShader_rectRenderGetFrag(), NULL);
+
 
 	/* DUMP ALL INFO */
 	vDumpEntryBuffer();
