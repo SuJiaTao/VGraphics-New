@@ -157,9 +157,7 @@ VGFXAPI vGLine vGCreateLine(vPosition p1, vPosition p2, vGColor c, float width)
 
 VGFXAPI vBOOL vGDrawLineV(vPosition p1, vPosition p2, vGColor c, float width)
 {
-	vGLine testLine;
-	testLine.p1  = p1;
-	testLine.p2  = p2;
+	vGLine testLine = vGCreateLine(p1, p2, c, width);
 
 	/* check if line already exists */
 	vDBufferIterate(_vgfx.lineSystem.lineList, vGLineListCollisionIterateFunc, &testLine);
@@ -169,7 +167,7 @@ VGFXAPI vBOOL vGDrawLineV(vPosition p1, vPosition p2, vGColor c, float width)
 
 	vGLock();
 	vPGLine line = vDBufferAdd(_vgfx.lineSystem.lineList, NULL);
-	*line = vGCreateLine(p1, p2, c, width);
+	*line = testLine;
 	vGUnlock();
 
 	return TRUE;
