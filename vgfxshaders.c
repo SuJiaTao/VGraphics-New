@@ -134,10 +134,10 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 	glLoadIdentity();
 
 	/* lastly move rect around */
-	glTranslatef(object->transform.position.x, object->transform.position.y,
+	glTranslatef(renderData->transform.position.x, renderData->transform.position.y,
 		(float)renderData->layer / 255.0f);
-	glRotatef(object->transform.rotation, 0.0f, 0.0f, 1.0f);
-	glScalef(object->transform.scale, object->transform.scale, 1.0f);
+	glRotatef(renderData->transform.rotation, 0.0f, 0.0f, 1.0f);
+	glScalef(renderData->transform.scale, renderData->transform.scale, 1.0f);
 
 	/* firstly, adjust rect to be right size */
 	glTranslatef(renderData->rect.left, renderData->rect.bottom, 1.0f);

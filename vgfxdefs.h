@@ -115,6 +115,8 @@ typedef struct vGRenderable
 	vPTR objectPtr;
 	vPTR internalStoredPtr;
 
+	vTransform transform;
+
 	vPGShader shader;
 
 	vPGSkin skin;

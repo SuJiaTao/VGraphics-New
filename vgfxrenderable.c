@@ -25,6 +25,7 @@ void vGRenderable_initFunc(vPObject object, vPComponent component, vPTR input)
 	renderableData->shader = inputCopy->shader;
 	renderableData->skin   = inputCopy->skin;
 	renderableData->tint   = inputCopy->tint;
+	renderableData->transform = inputCopy->transform;
 
 	vFree(inputCopy);
 }
