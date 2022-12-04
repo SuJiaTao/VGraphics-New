@@ -134,7 +134,8 @@ typedef struct vGLine
 {
 	vPosition p1;
 	vPosition p2;
-	vGColor col;
+	vGColor   col;
+	float     width;
 } vGLine, *vPGLine;
 
 
@@ -180,6 +181,7 @@ typedef struct vGLineSystem
 	vPObject lineSystemObject;	/* object that holds the line system	*/
 	vPGRenderable lineSystem;	/* line system							*/
 
+	GLuint lineVertexBuffer;	/* gl VBO for line data					*/
 	vPGShader lineShader;		/* line shader							*/
 } vGLineSystem, *vPGLineSystem;
 
