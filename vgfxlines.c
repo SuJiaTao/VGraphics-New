@@ -210,3 +210,13 @@ VGFXAPI void vGDrawLines(vPGLine lineList, vUI16 count)
 		vGDrawLineV(line->p1, line->p2, line->col, line->width);
 	}
 }
+
+VGFXAPI void vGDrawLinesConnected(vPPosition pVect, vUI16 count, vGColor c, float width)
+{
+	for (int i = 0; i < count; i++)
+	{
+		vPosition p1 = pVect[i + 0];
+		vPosition p2 = pVect[(i + 1) % count];
+		vGDrawLineV(p1, p2, c, width);
+	}
+}

@@ -20,6 +20,7 @@ VGFXAPI vBOOL vGDrawLineV(vPosition p1, vPosition p2, vGColor c, float width);
 VGFXAPI vBOOL vGDrawLineF(float p1x, float p1y, float p2x, float p2y, vGColor c,
 	float width);
 VGFXAPI void vGDrawLines(vPGLine lineList, vUI16 count);
+VGFXAPI void vGDrawLinesConnected(vPPosition pVect, vUI16 count, vGColor c, float width);
 
 
 #endif
