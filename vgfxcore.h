@@ -23,6 +23,7 @@ VGFXAPI void vGUnlock(void);
 VGFXAPI vPGRenderable vGCreateRenderable(vPObject object, vTransform transform,
 	vPGShader shader, vPGSkin skin, vGRect rect);
 VGFXAPI void vGDestroyRenderable(vPObject object);
+VGFXAPI vUI16 vGGetComponentHandle(void);
 
 
 /* ========== OBJECT CREATION AND DESTRUCTION	==========	*/

@@ -145,6 +145,11 @@ VGFXAPI void vGDestroyRenderable(vPObject object)
 	vObjectRemoveComponent(object, _vgfx.renderableHandle);
 }
 
+VGFXAPI vUI16 vGGetComponentHandle(void)
+{
+	return _vgfx.renderableHandle;
+}
+
 
 /* ========== OBJECT CREATION AND DESTRUCTION	==========	*/
 VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER renderFunc,
