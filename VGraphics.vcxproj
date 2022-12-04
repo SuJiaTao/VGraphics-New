@@ -22,12 +22,14 @@
     <ClInclude Include="vgfx.h" />
     <ClInclude Include="vgfxcore.h" />
     <ClInclude Include="vgfxdefs.h" />
+    <ClInclude Include="vgfxlines.h" />
     <ClInclude Include="vgfxrenderable.h" />
     <ClInclude Include="vgfxshaders.h" />
     <ClInclude Include="vgfxthread.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vgfxcore.c" />
+    <ClCompile Include="vgfxlines.c" />
     <ClCompile Include="vgfxrenderable.c" />
     <ClCompile Include="vgfxshaders.c" />
     <ClCompile Include="vgfxthread.c" />

@@ -10,6 +10,7 @@
 #include "vcore.h"				/* core functions			*/
 #include "vgfxdefs.h"			/* types, structs and defs	*/
 #include "vgfxcore.h"			/* core gfx functions		*/
+#include "vgfxlines.h"			/* line drawing system		*/
 
 
 #endif

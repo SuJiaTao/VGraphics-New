@@ -39,6 +39,8 @@
 
 #define VGFX_WINDOW_CLASS_NAME		"vGFX Window Class"
 
+#define LINELIST_NODE_SIZE	0x200
+
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
 #define VGFX_COLOR_1b  77, 119, 109
@@ -128,6 +130,13 @@ typedef struct vGRenderable
 	vUI8 layer;
 } vGRenderable, *vPGRenderable;
 
+typedef struct vGLine
+{
+	vPosition p1;
+	vPosition p2;
+	vGColor col;
+} vGLine, *vPGLine;
+
 
 /* ========== WINDOW STATE						==========	*/
 typedef struct vGWindow
@@ -163,6 +172,17 @@ typedef struct vGDefaultShaders
 	vPGShader rectShader;
 } vGDefaultShaders, *vPGDefaultShaders;
 
+typedef struct vGLineSystem
+{
+	vBOOL isInit;
+
+	vHNDL lineList;				/* list of lines to draw (per cycle)	*/
+	vPObject lineSystemObject;	/* object that holds the line system	*/
+	vPGRenderable lineSystem;	/* line system							*/
+
+	vPGShader lineShader;		/* line shader							*/
+} vGLineSystem, *vPGLineSystem;
+
 typedef struct vGCameraTransformStack 
 {
 	vTransform stack[CAMERA_TRANSFORM_STACK_SIZE];
@@ -194,6 +214,9 @@ typedef struct _vGInternals
 
 	/* camera transform */
 	vGCameraTransformStack cameraTransform;
+
+	/* line system */
+	vGLineSystem lineSystem;
 } _vGInternals, *_vPGInternals;
 
 _vGInternals _vgfx;	/* INSTANCE */

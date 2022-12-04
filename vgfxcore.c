@@ -84,6 +84,8 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 		vGCreateShader(NULL, vGShader_rectRender, NULL,
 			NULL, vGShader_rectRenderGetVert(), vGShader_rectRenderGetFrag(), NULL);
 
+	/* initialize line system */
+	vGLineSystemInit();
 
 	/* DUMP ALL INFO */
 	vDumpEntryBuffer();
