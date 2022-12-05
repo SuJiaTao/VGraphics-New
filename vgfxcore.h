@@ -46,9 +46,6 @@ VGFXAPI vGColor vGCreateColorB(vBYTE r, vBYTE g, vBYTE b, vBYTE a);
 VGFXAPI vTransform  vGCameraGetTransform(void);
 VGFXAPI vPTransform vGCameraGetTransformPTR(void);
 VGFXAPI void  vGCameraSetTransform(vTransform transform);
-VGFXAPI vBOOL vGCameraPush(void);
-VGFXAPI vBOOL vGCameraPop(vPTransform prevCamera);
-VGFXAPI vUI32 vGCameraGetPointer(void);
 
 
 /* ========== DEFAULT VALUES					==========	*/

@@ -182,14 +182,9 @@ typedef struct vGLineSystem
 	vPGRenderable lineSystem;	/* line system							*/
 
 	GLuint lineVertexBuffer;	/* gl VBO for line data					*/
+	GLuint lineVertexArray;		/* gl VAO for drawArray call			*/
 	vPGShader lineShader;		/* line shader							*/
 } vGLineSystem, *vPGLineSystem;
-
-typedef struct vGCameraTransformStack 
-{
-	vTransform stack[CAMERA_TRANSFORM_STACK_SIZE];
-	vUI32	   ptr;
-} vGCameraTransformStack, *vPGCameraTransformStack;
 
 typedef struct _vGInternals
 {
@@ -215,7 +210,7 @@ typedef struct _vGInternals
 	vGDefaultShaders defaultShaders;
 
 	/* camera transform */
-	vGCameraTransformStack cameraTransform;
+	vTransform cameraTransform;
 
 	/* line system */
 	vGLineSystem lineSystem;

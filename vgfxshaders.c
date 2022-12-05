@@ -125,7 +125,7 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 
 	vTransform cameraTransform = vGCameraGetTransform();
 	glRotatef(-cameraTransform.rotation, 0.0f, 0.0f, 1.0f);
-	glTranslatef(cameraTransform.position.x, cameraTransform.position.y,
+	glTranslatef(-cameraTransform.position.x, -cameraTransform.position.y,
 		0.0f);
 	glScalef(cameraTransform.scale, cameraTransform.scale, 1.0f);
 

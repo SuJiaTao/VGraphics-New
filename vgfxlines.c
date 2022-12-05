@@ -7,6 +7,7 @@
 /* ========== INCLUDES							==========	*/
 #include "glew.h"
 #include "vgfxlines.h"
+#include <stdio.h>
 
 
 /* ========== SHADER SOURCE						==========	*/
@@ -76,10 +77,11 @@ void vGLineShaderRenderIterateFunc(vHNDL dbuffer, vPGLine line, vPTR input)
 	glUniform4fv(1, 1, &line->col);
 
 	/* copy vertex data to GL buffer */
+	glBindBuffer(GL_ARRAY_BUFFER, _vgfx.lineSystem.lineVertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vPosition) * 2, line, GL_DYNAMIC_DRAW);
 
 	/* bind to default vertex array */
-	glBindVertexArray(_vgfx.defaultShaderData.vertexAttribute);
+	glBindVertexArray(_vgfx.lineSystem.lineVertexArray);
 
 	/* draw line */
 	glLineWidth(line->width);
@@ -88,6 +90,10 @@ void vGLineShaderRenderIterateFunc(vHNDL dbuffer, vPGLine line, vPTR input)
 
 void vGLineShader_initFunc(vPGShader shader, vPTR shaderData, vPTR input)
 {
+	/* create vertex array */
+	glGenVertexArrays(1, &_vgfx.lineSystem.lineVertexArray);
+	glBindVertexArray(_vgfx.lineSystem.lineVertexArray);
+
 	/* create line vertex buffer	*/
 	glGenBuffers(1, &_vgfx.lineSystem.lineVertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, _vgfx.lineSystem.lineVertexBuffer);
@@ -96,7 +102,7 @@ void vGLineShader_initFunc(vPGShader shader, vPTR shaderData, vPTR input)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vPosition) * 2, NULL, GL_DYNAMIC_DRAW);
 
 	/* setup vertex attribute */
-	glBindVertexArray(_vgfx.defaultShaderData.vertexAttribute);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
 	glEnableVertexAttribArray(0);
 }
 
@@ -109,7 +115,7 @@ void vGLineShader_renderFunc(vPGShader shader, vPTR unused,
 
 	vTransform cameraTransform = vGCameraGetTransform();
 	glRotatef(-cameraTransform.rotation, 0.0f, 0.0f, 1.0f);
-	glTranslatef(cameraTransform.position.x, cameraTransform.position.y,
+	glTranslatef(-cameraTransform.position.x, -cameraTransform.position.y,
 		0.0f);
 	glScalef(cameraTransform.scale, cameraTransform.scale, 1.0f);
 
@@ -136,7 +142,7 @@ void vGLineShader_renderFunc(vPGShader shader, vPTR unused,
 
 	vDBufferIterate(_vgfx.lineSystem.lineList,
 		vGLineShaderRenderIterateFunc, NULL);
-
+	
 	/* clear line buffer */
 	vDBufferClear(_vgfx.lineSystem.lineList);
 }
@@ -187,10 +193,10 @@ VGFXAPI vBOOL vGDrawLineV(vPosition p1, vPosition p2, vGColor c, float width)
 	/* if alpha == 0, don't draw */
 	if (testLine.col.A == 0) return FALSE;
 
-	vGLock();
+	vDBufferLock(_vgfx.lineSystem.lineList);
 	vPGLine line = vDBufferAdd(_vgfx.lineSystem.lineList, NULL);
 	*line = testLine;
-	vGUnlock();
+	vDBufferUnlock(_vgfx.lineSystem.lineList);
 
 	return TRUE;
 }
@@ -219,4 +225,12 @@ VGFXAPI void vGDrawLinesConnected(vPPosition pVect, vUI16 count, vGColor c, floa
 		vPosition p2 = pVect[(i + 1) % count];
 		vGDrawLineV(p1, p2, c, width);
 	}
+}
+
+VGFXAPI void vGDrawCross(vPosition pos, float radius, vGColor c, float width)
+{
+	vGDrawLineF(pos.x - radius, pos.y + radius, pos.x + radius, pos.y - radius,
+		c, width);
+	vGDrawLineF(pos.x + radius, pos.y + radius, pos.x - radius, pos.y - radius,
+		c, width);
 }
