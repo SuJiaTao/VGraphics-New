@@ -304,7 +304,7 @@ void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable* element,
 	float aspect = (float)width / (float)height;
 
 	glViewport(0, 0, width, height);
-	glOrtho(-aspect, aspect, -1, 1, -1, 1);
+	glOrtho(-aspect, aspect, -1.0, 1.0, ZNEAR_DEPTH, ZFAR_DEPTH);
 
 	/* call shader functions */
 	if (shader->renderFunc)

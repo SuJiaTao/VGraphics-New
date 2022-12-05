@@ -122,6 +122,7 @@ void vGLineShader_renderFunc(vPGShader shader, vPTR unused,
 	/* clear modelview matrix */
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glTranslatef(0.0f, 0.0f, LINE_ZDEPTH);
 
 	/* clear texture matrix */
 	glMatrixMode(GL_TEXTURE);

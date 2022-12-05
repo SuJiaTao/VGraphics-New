@@ -41,6 +41,10 @@
 
 #define LINELIST_NODE_SIZE	0x200
 
+#define ZNEAR_DEPTH			-1.0
+#define ZFAR_DEPTH			 10.0
+#define LINE_ZDEPTH			 0.5
+
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
 #define VGFX_COLOR_1b  77, 119, 109
