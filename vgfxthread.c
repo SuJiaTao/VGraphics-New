@@ -24,6 +24,13 @@ static GLuint vhGCompileShader(GLenum shaderType, vPCHAR source)
 {
 	vLogInfo(__func__, "Started Compiling Shader.");
 
+	/* if source is NULL, skip */
+	if (source == NULL)
+	{
+		vLogError(__func__, "Tried to create shader with NULL src. Aborting.");
+		return ZERO;
+	}
+
 	/* create empty shader object */
 	GLuint shaderID = glCreateShader(shaderType);
 
@@ -82,6 +89,13 @@ static void vhGExitCallbackList_iterateFunc(vHNDL buffer, vUI16 index,
 static GLuint vhGCreateProgram(GLuint vert, GLuint frag)
 {
 	vLogInfo(__func__, "Creating shader program.");
+
+	/* if either are ZERO, abort */
+	if (vert == ZERO || frag == ZERO)
+	{
+		vLogError(__func__, "Vert and Frag shaders missing. Aborting.");
+		return ZERO;
+	}
 
 	/* create new program and link vert & frag to it */
 	GLuint shaderProgramID = glCreateProgram();

@@ -18,7 +18,6 @@ static const char* vGLineVertexSource =
 "layout (location = 1) uniform vec4 v_color;\n"
 "layout (location = 2) uniform mat4 v_projection;\n"
 "layout (location = 3) uniform mat4 v_model;\n"
-"layout (location = 4) uniform mat4 v_texture;\n"
 "\n"
 "out vec4 f_color;\n"
 "\n"
@@ -78,10 +77,21 @@ void vGLineShaderRenderIterateFunc(vHNDL dbuffer, vPGLine line, vPTR input)
 
 	/* copy vertex data to GL buffer */
 	glBindBuffer(GL_ARRAY_BUFFER, _vgfx.lineSystem.lineVertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vPosition) * 2, line, GL_DYNAMIC_DRAW);
+
+	float lineData[4];
+	lineData[0] = line->p1.x;
+	lineData[1] = line->p1.y;
+	lineData[2] = line->p2.x;
+	lineData[3] = line->p2.y;
+	glBufferData(GL_ARRAY_BUFFER, sizeof(lineData), lineData, GL_STATIC_DRAW);
 
 	/* bind to default vertex array */
 	glBindVertexArray(_vgfx.lineSystem.lineVertexArray);
+	glEnableVertexAttribArray(0);
+
+	/* disable textures and blending */
+	glDisable(GL_TEXTURE);
+	glDisable(GL_BLEND);
 
 	/* draw line */
 	glLineWidth(line->width);
@@ -97,9 +107,6 @@ void vGLineShader_initFunc(vPGShader shader, vPTR shaderData, vPTR input)
 	/* create line vertex buffer	*/
 	glGenBuffers(1, &_vgfx.lineSystem.lineVertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, _vgfx.lineSystem.lineVertexBuffer);
-
-	/* setup buffer */
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vPosition) * 2, NULL, GL_DYNAMIC_DRAW);
 
 	/* setup vertex attribute */
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
@@ -131,21 +138,23 @@ void vGLineShader_renderFunc(vPGShader shader, vPTR unused,
 	/* retrieve all data from gl matrix stack */
 	GLfloat projectionMatrix[0x10];
 	GLfloat modelMatrix[0x10];
-	GLfloat textureMatrix[0x10];
 	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
 	glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
-	glGetFloatv(GL_TEXTURE_MATRIX, textureMatrix);
 
 	/* apply uniform values */
 	glUniformMatrix4fv(2, 1, GL_FALSE, projectionMatrix);
 	glUniformMatrix4fv(3, 1, GL_FALSE, modelMatrix);
-	glUniformMatrix4fv(4, 1, GL_FALSE, textureMatrix);
 
 	vDBufferIterate(_vgfx.lineSystem.lineList,
 		vGLineShaderRenderIterateFunc, NULL);
 	
 	/* clear line buffer */
-	vDBufferClear(_vgfx.lineSystem.lineList);
+	//vDBufferClear(_vgfx.lineSystem.lineList);
+}
+
+void vGLineBufferInitFunc(vHNDL hndl, vPGLine element, vPGLine input)
+{
+	vMemCopy(element, input, sizeof(vGLine));
 }
 
 /* ========== INIT FUNCTION						==========	*/
@@ -154,8 +163,8 @@ VGFXAPI vBOOL vGLineSystemInit(void)
 	if (_vgfx.lineSystem.isInit == TRUE) return FALSE;
 
 	/* create line buffer */
-	_vgfx.lineSystem.lineList = vCreateDBuffer("vGFX Line Buffer",
-		sizeof(vGLine), LINELIST_NODE_SIZE, NULL, NULL);
+	_vgfx.lineSystem.lineList = vCreateDBuffer("vGFX Line List",
+		sizeof(vGLine) * 2, LINELIST_NODE_SIZE, vGLineBufferInitFunc, NULL);
 
 	/* create line object */
 	_vgfx.lineSystem.lineSystemObject = vCreateObject(NULL);
@@ -167,7 +176,7 @@ VGFXAPI vBOOL vGLineSystemInit(void)
 
 	_vgfx.lineSystem.lineSystem = vGCreateRenderable(_vgfx.lineSystem.lineSystemObject,
 		vCreateTransformF(0, 0, 0, 1.0), _vgfx.lineSystem.lineShader,
-		NULL, vGCreateRectCentered(1.0f, 1.0f));
+		NULL, vGCreateRectCentered(0.1f, 0.1f));
 
 	return TRUE;
 }
@@ -194,10 +203,10 @@ VGFXAPI vBOOL vGDrawLineV(vPosition p1, vPosition p2, vGColor c, float width)
 	/* if alpha == 0, don't draw */
 	if (testLine.col.A == 0) return FALSE;
 
-	vDBufferLock(_vgfx.lineSystem.lineList);
-	vPGLine line = vDBufferAdd(_vgfx.lineSystem.lineList, NULL);
-	*line = testLine;
-	vDBufferUnlock(_vgfx.lineSystem.lineList);
+	/* add copy of testline object */
+	vDBufferAdd(_vgfx.lineSystem.lineList, &testLine);
+
+	printf("%d\n", vDBufferGetElementCount(_vgfx.lineSystem.lineList));
 
 	return TRUE;
 }
