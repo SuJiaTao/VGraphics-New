@@ -149,7 +149,7 @@ void vGLineShader_renderFunc(vPGShader shader, vPTR unused,
 		vGLineShaderRenderIterateFunc, NULL);
 	
 	/* clear line buffer */
-	//vDBufferClear(_vgfx.lineSystem.lineList);
+	vDBufferClear(_vgfx.lineSystem.lineList);
 }
 
 void vGLineBufferInitFunc(vHNDL hndl, vPGLine element, vPGLine input)
@@ -205,8 +205,6 @@ VGFXAPI vBOOL vGDrawLineV(vPosition p1, vPosition p2, vGColor c, float width)
 
 	/* add copy of testline object */
 	vDBufferAdd(_vgfx.lineSystem.lineList, &testLine);
-
-	printf("%d\n", vDBufferGetElementCount(_vgfx.lineSystem.lineList));
 
 	return TRUE;
 }
