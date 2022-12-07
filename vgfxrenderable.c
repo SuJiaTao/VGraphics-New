@@ -13,12 +13,12 @@ void vGRenderable_initFunc(vPObject object, vPComponent component, vPTR input)
 	/* get input copy (MUST BE FROM HEAP) */
 	vPGRenderable inputCopy = input;
 
-	/* refer to vgfxcore.c for renderableList adding behavior */
-	vDBufferAdd(_vgfx.renderableList, component->objectAttribute);
-
 	/* get object attribute and copy data from input  */
 	vPGRenderable renderableData = component->objectAttribute;
 	vMemCopy(renderableData, input, sizeof(vGRenderable));
+
+	/* refer to vgfxcore.c for renderableList adding behavior */
+	vDBufferAdd(_vgfx.renderableList, component->objectAttribute);
 
 	vFree(inputCopy);
 
