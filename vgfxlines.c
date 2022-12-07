@@ -171,7 +171,7 @@ VGFXAPI vBOOL vGLineSystemInit(void)
 
 	_vgfx.lineSystem.lineSystem = vGCreateRenderable(_vgfx.lineSystem.lineSystemObject,
 		vCreateTransformF(0, 0, 0, 1.0), _vgfx.lineSystem.lineShader,
-		NULL, vGCreateRectCentered(0.1f, 0.1f));
+		NULL, vGCreateRectCentered(0.1f, 0.1f), NULL);
 
 	return TRUE;
 }

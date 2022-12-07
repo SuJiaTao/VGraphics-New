@@ -16,23 +16,24 @@ void vGRenderable_initFunc(vPObject object, vPComponent component, vPTR input)
 	/* refer to vgfxcore.c for renderableList adding behavior */
 	vDBufferAdd(_vgfx.renderableList, component->objectAttribute);
 
-	/* setup metadata */
+	/* get object attribute and copy data from input  */
 	vPGRenderable renderableData = component->objectAttribute;
-	renderableData->objectPtr = object;
-
-	/* setup render-related members */
-	renderableData->rect   = inputCopy->rect;
-	renderableData->shader = inputCopy->shader;
-	renderableData->skin   = inputCopy->skin;
-	renderableData->tint   = inputCopy->tint;
-	renderableData->transform = inputCopy->transform;
+	vMemCopy(renderableData, input, sizeof(vGRenderable));
 
 	vFree(inputCopy);
+
+	/* call initfunc */
+	if (renderableData->behavior.initFunc)
+		renderableData->behavior.initFunc(renderableData);
 }
 
 void vGRenderable_destroyFunc(vPObject object, vPComponent component)
 {
 	vPGRenderable renderableData = component->objectAttribute;
+
+	/* call destroy func if exists */
+	if (renderableData->behavior.exitFunc)
+		renderableData->behavior.exitFunc(renderableData);
 
 	/* refer to vgfxcore.c for renderableList remove behavior */
 	vDBufferRemove(_vgfx.renderableList,

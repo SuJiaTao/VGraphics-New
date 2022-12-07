@@ -126,14 +126,22 @@ VGFXAPI void vGUnlock(void)
 
 /* ========== RENDERABLE ATTACHMENT				==========	*/
 VGFXAPI vPGRenderable vGCreateRenderable(vPObject object, vTransform transform,
-	vPGShader shader, vPGSkin skin, vGRect rect)
+	vPGShader shader, vPGSkin skin, vGRect rect, vPGRenderableBehavior behavior)
 {
 	vPGRenderable input = vAllocZeroed(sizeof(vGRenderable));
+
+	input->objectPtr = object; /* setup metadata */
+
+	/* setup render data */
 	input->shader = shader;
 	input->skin = skin;
 	input->rect = rect;
 	input->tint = vGCreateColorF(1.0f, 1.0f, 1.0f, 1.0f);
 	input->transform = transform;
+
+	/* setup object behavior */
+	if (behavior != NULL)
+		vMemCopy(&input->behavior, behavior, sizeof(vGRenderableBehavior));
 
 	/* refer to vgfxrenderable.c for input behavior */
 	vPComponent renderComponent = 

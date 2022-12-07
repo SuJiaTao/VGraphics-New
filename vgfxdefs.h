@@ -65,6 +65,9 @@ typedef void (*vPFGSHADERRENDER)(struct vGShader* shader, vPTR shaderData,
 	struct vObject* object, struct vGRenderable* renderData);
 typedef void (*vPFGSHADEREXIT)(struct vGShader* shader, vPTR shaderData);
 typedef void (*vPFGEXITCALLBACK)(void);
+typedef void (*vPFGRENDINIT)(struct vGRenderable* renderable);
+typedef void (*vPFGRENDCYCLE)(struct vGRenderable* renderable);
+typedef void (*vPFGRENDEXIT)(struct vGRenderable* renderable);
 
 
 /* ========== ENUMS								==========	*/
@@ -116,6 +119,13 @@ typedef struct vGShader
 	vPFGSHADEREXIT   exitFunc;
 } vGShader, *vPGShader;
 
+typedef struct vGRenderableBehavior
+{
+	vPFGRENDINIT  initFunc;
+	vPFGRENDCYCLE cycleFunc;
+	vPFGRENDEXIT  exitFunc;
+} vGRenderableBehavior, *vPGRenderableBehavior;
+
 typedef struct vGRenderable
 {
 	vPTR objectPtr;
@@ -132,6 +142,8 @@ typedef struct vGRenderable
 	vGRect  rect;
 
 	vUI8 layer;
+
+	vGRenderableBehavior behavior;
 } vGRenderable, *vPGRenderable;
 
 typedef struct vGLine

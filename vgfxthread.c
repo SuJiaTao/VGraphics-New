@@ -303,6 +303,10 @@ void vGRenderableListIterateDrawFunc(vHNDL dbHndl, vPGRenderable* element,
 
 	vPGShader shader = renderable->shader;
 
+	/* call renderable's update func (if exists) */
+	if (renderable->behavior.cycleFunc)
+		renderable->behavior.cycleFunc(renderable);
+
 	/* ensure shader doesn't exist, use err shader */
 	if (shader == NULL) shader = _vgfx.defaultShaders.errShader;
 	
