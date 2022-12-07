@@ -77,13 +77,8 @@ void vGLineShaderRenderIterateFunc(vHNDL dbuffer, vPGLine line, vPTR input)
 
 	/* copy vertex data to GL buffer */
 	glBindBuffer(GL_ARRAY_BUFFER, _vgfx.lineSystem.lineVertexBuffer);
-
-	float lineData[4];
-	lineData[0] = line->p1.x;
-	lineData[1] = line->p1.y;
-	lineData[2] = line->p2.x;
-	lineData[3] = line->p2.y;
-	glBufferData(GL_ARRAY_BUFFER, sizeof(lineData), lineData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vPosition) * 2, 
+		line, GL_DYNAMIC_DRAW);
 
 	/* bind to default vertex array */
 	glBindVertexArray(_vgfx.lineSystem.lineVertexArray);
