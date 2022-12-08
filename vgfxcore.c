@@ -475,6 +475,11 @@ VGFXAPI vPosition vGScreenSpaceToWorld(vPosition screenPos)
 	return vCreatePosition(worldX, worldY);
 }
 
+VGFXAPI vPosition vGWorldSpaceMousePosition(void)
+{
+	return vGScreenSpaceToWorld(vGScreenSpaceMousePos());
+}
+
 VGFXAPI vPosition vGWorldSpaceToScreen(vPosition worldPos)
 {
 	float screenX = worldPos.x;
