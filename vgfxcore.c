@@ -474,3 +474,36 @@ VGFXAPI vPosition vGScreenSpaceToWorld(vPosition screenPos)
 
 	return vCreatePosition(worldX, worldY);
 }
+
+VGFXAPI vPosition vGWorldSpaceToScreen(vPosition worldPos)
+{
+	float screenX = worldPos.x;
+	float screenY = worldPos.y;
+
+	/* first, unscale */
+	screenX *= _vgfx.cameraTransform.scale;
+	screenY *= _vgfx.cameraTransform.scale;
+
+	/* next, de-translate */
+	screenX -= _vgfx.cameraTransform.position.x;
+	screenY -= _vgfx.cameraTransform.position.y;
+
+	/* last, de-rotate */
+	float r = sqrtf(screenX * screenX + screenY * screenY);
+	float t = atan2f(screenY, screenX);
+	t -= _vgfx.cameraTransform.rotation * 0.0174533f;
+	screenX = r * cosf(t);
+	screenY = r * sinf(t);
+
+	/* get window dimensions */
+	float windowHeight = _vgfx.window.dimensions.bottom - _vgfx.window.dimensions.top;
+	float windowWidth  = _vgfx.window.dimensions.right - _vgfx.window.dimensions.left;
+
+	/* map to screenspace */
+	float aspect = windowWidth / windowHeight;
+	float inverseaspect = windowHeight / windowWidth;
+	screenX = (screenX + aspect) * (windowWidth  * 0.5f * inverseaspect);
+	screenY = (screenY + 1.0f) * (windowHeight * 0.5f);
+
+	return vCreatePosition(screenX, screenY);
+}
