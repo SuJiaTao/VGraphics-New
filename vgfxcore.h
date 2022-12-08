@@ -62,4 +62,9 @@ VGFXAPI vBOOL vGExited(void);
 /* ========== INTERNALS							==========	*/
 VGFXAPI _vPGInternals vGGetInternals(void);
 
+
+/* ========== SCREENSPACE PROJECTIONS			==========	*/
+VGFXAPI vPosition vGScreenSpaceMousePos(void);
+VGFXAPI vPosition vGScreenSpaceToWorld(vPosition screenPos);
+
 #endif

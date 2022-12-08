@@ -5,6 +5,7 @@
 
 /* ========== INCLUDES							==========	*/
 #include <stdio.h>
+#include <math.h>
 #include "vgfxcore.h"
 #include "vgfxthread.h"
 #include "vgfxrenderable.h"
@@ -258,7 +259,7 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, v
 
 	/* load file into primary memory */
 	vUI64 fileSizeBytes = vFileSize(fileHndl);
-	vPBYTE fileBlock = vAlloc(fileSizeBytes);
+	vPBYTE fileBlock = vAllocZeroed(fileSizeBytes + 8);
 	vBOOL result = vFileRead(fileHndl, 0, fileSizeBytes, fileBlock);
 	if (result == FALSE)
 	{
@@ -429,4 +430,47 @@ VGFXAPI vBOOL vGExited(void)
 VGFXAPI _vPGInternals vGGetInternals(void)
 {
 	return &_vgfx;
+}
+
+
+/* ========== SCREENSPACE PROJECTIONS			==========	*/
+VGFXAPI vPosition vGScreenSpaceMousePos(void)
+{
+	POINT p;
+	GetCursorPos(&p); /* get cursor pos */
+	ScreenToClient(_vgfx.window.window, &p); /* convert relative to window */
+	LONG windowHeight = 
+		_vgfx.window.dimensions.bottom - _vgfx.window.dimensions.top;
+	return vCreatePosition(p.x, windowHeight - p.y);
+}
+
+VGFXAPI vPosition vGScreenSpaceToWorld(vPosition screenPos)
+{
+	/* get window dimensions */
+	float windowHeight = _vgfx.window.dimensions.bottom - _vgfx.window.dimensions.top;
+	float windowWidth  = _vgfx.window.dimensions.right - _vgfx.window.dimensions.left;
+
+	/* map to untransformed world space */
+	float aspect = windowWidth / windowHeight;
+	float worldX = (screenPos.x / (windowWidth  * (1.0f / (2.0f * aspect)))) - aspect;
+	float worldY = (screenPos.y / (windowHeight * 0.5f)) - 1.0f;
+
+	/* transform to world space */
+
+	/* first, rotate */
+	float r = sqrtf(worldX * worldX + worldY * worldY);
+	float t = atan2f(worldY, worldX);
+	t += _vgfx.cameraTransform.rotation * 0.0174533f;
+	worldX = r * cosf(t);
+	worldY = r * sinf(t);
+
+	/* next, translate */
+	worldX += _vgfx.cameraTransform.position.x;
+	worldX += _vgfx.cameraTransform.position.y;
+
+	/* last, scale */
+	worldX /= _vgfx.cameraTransform.scale;
+	worldY /= _vgfx.cameraTransform.scale;
+
+	return vCreatePosition(worldX, worldY);
 }
