@@ -290,7 +290,7 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, v
 		/* if data chunk, parse data to remove all filter bytes */
 		if (strcmp(blockName, "IDAT") == ZERO)
 		{
-			vPBYTE parsedBlock = vAlloc(width * height * 4);
+			vPBYTE parsedBlock = vAllocZeroed((width * height * 4) + 8);
 			vPBYTE imageData = fileBlock + (readPointer + 8);
 			vUI64  imageByteIndex = 0;
 			for (int i = 0; i < height; i++)
@@ -312,21 +312,22 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, v
 			skin = vGCreateSkinFromBytes(width, height, skinCount, wrap,
 				parsedBlock);
 
-			/* free memory and break */
+			/* end function */
 			vFree(parsedBlock);
-			break;
+			vFree(fileBlock);
+			vFileClose(fileHndl);
+
+			vLogInfoFormatted(__func__, "Skin created from PNG!");
+			return skin;
 		}
 
 		/* move to next chunk */
 		readPointer = readPointer + blockLength + 4;
 	}
 
-	/* free data */
-	vFree(fileBlock);
-	vFileClose(fileHndl);
-
-	vLogInfoFormatted(__func__, "Skin created from PNG!");
-	return skin;
+	/* should not reach here */
+	vLogErrorFormatted(__func__, "Parsed PNG without finding image data.");
+	return NULL;
 }
 
 VGFXAPI void vGDestroySkin(vPGSkin skin)
