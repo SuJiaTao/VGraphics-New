@@ -60,15 +60,6 @@ static const char* vGLineFragmentSource =
 "}";
 
 
-/* ========== LINE COLLISION FUNCTION			==========	*/
-void vGLineListCollisionIterateFunc(vHNDL dbuffer, vPGLine line, vPGLine input)
-{
-	/* if line already exists, mark for skip */
-	if (*(vPUI64)&line->p1 == *(vPUI64)&input->p1 &&
-		*(vPUI64)&line->p2 == *(vPUI64)&input->p2) input->col.A = 0.0f;
-}
-
-
 /* ========== SHADER FUNCTIONS					==========	*/
 void vGLineShaderRenderIterateFunc(vHNDL dbuffer, vPGLine line, vPTR input)
 {
@@ -191,9 +182,6 @@ VGFXAPI vGLine vGCreateLine(vPosition p1, vPosition p2, vGColor c, float width)
 VGFXAPI vBOOL vGDrawLineV(vPosition p1, vPosition p2, vGColor c, float width)
 {
 	vGLine testLine = vGCreateLine(p1, p2, c, width);
-
-	/* check if line already exists */
-	vDBufferIterate(_vgfx.lineSystem.lineList, vGLineListCollisionIterateFunc, &testLine);
 
 	/* if alpha == 0, don't draw */
 	if (testLine.col.A == 0) return FALSE;
