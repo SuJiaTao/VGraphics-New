@@ -107,10 +107,10 @@ void vGLineShader_renderFunc(vPGShader shader, vPTR unused,
 	glMatrixMode(GL_PROJECTION);
 
 	vTransform cameraTransform = vGCameraGetTransform();
+	glScalef(cameraTransform.scale, cameraTransform.scale, 1.0f);
 	glRotatef(-cameraTransform.rotation, 0.0f, 0.0f, 1.0f);
 	glTranslatef(-cameraTransform.position.x, -cameraTransform.position.y,
 		0.0f);
-	glScalef(cameraTransform.scale, cameraTransform.scale, 1.0f);
 
 	/* clear modelview matrix */
 	glMatrixMode(GL_MODELVIEW);

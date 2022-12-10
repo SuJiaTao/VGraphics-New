@@ -458,20 +458,20 @@ VGFXAPI vPosition vGScreenSpaceToWorld(vPosition screenPos)
 
 	/* transform to world space */
 
-	/* first, rotate */
+	/* scale */
+	worldX /= _vgfx.cameraTransform.scale;
+	worldY /= _vgfx.cameraTransform.scale;
+
+	/* rotate */
 	float r = sqrtf(worldX * worldX + worldY * worldY);
 	float t = atan2f(worldY, worldX);
 	t += _vgfx.cameraTransform.rotation * 0.0174533f;
 	worldX = r * cosf(t);
 	worldY = r * sinf(t);
 
-	/* next, translate */
+	/* translate */
 	worldX += _vgfx.cameraTransform.position.x;
-	worldX += _vgfx.cameraTransform.position.y;
-
-	/* last, scale */
-	worldX /= _vgfx.cameraTransform.scale;
-	worldY /= _vgfx.cameraTransform.scale;
+	worldY += _vgfx.cameraTransform.position.y;
 
 	return vCreatePosition(worldX, worldY);
 }
@@ -486,20 +486,20 @@ VGFXAPI vPosition vGWorldSpaceToScreen(vPosition worldPos)
 	float screenX = worldPos.x;
 	float screenY = worldPos.y;
 
-	/* first, unscale */
-	screenX *= _vgfx.cameraTransform.scale;
-	screenY *= _vgfx.cameraTransform.scale;
-
-	/* next, de-translate */
+	/* de-translate */
 	screenX -= _vgfx.cameraTransform.position.x;
 	screenY -= _vgfx.cameraTransform.position.y;
 
-	/* last, de-rotate */
+	/* de-rotate */
 	float r = sqrtf(screenX * screenX + screenY * screenY);
 	float t = atan2f(screenY, screenX);
 	t -= _vgfx.cameraTransform.rotation * 0.0174533f;
 	screenX = r * cosf(t);
 	screenY = r * sinf(t);
+
+	/* unscale */
+	screenX *= _vgfx.cameraTransform.scale;
+	screenY *= _vgfx.cameraTransform.scale;
 
 	/* get window dimensions */
 	float windowHeight = _vgfx.window.dimensions.bottom - _vgfx.window.dimensions.top;
