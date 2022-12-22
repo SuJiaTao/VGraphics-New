@@ -41,9 +41,10 @@
 
 #define LINELIST_NODE_SIZE	0x200
 
-#define ZNEAR_DEPTH			-1.0
-#define ZFAR_DEPTH			 10.0
-#define LINE_ZDEPTH			 0.5
+#define ZNEAR_DEPTH			  0.0
+#define ZFAR_DEPTH			  100.0
+#define RECT_ZDEPTH			 -50.0
+#define LINE_ZDEPTH			 -10.0
 
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
@@ -141,7 +142,7 @@ typedef struct vGRenderable
 	vGColor tint;
 	vGRect  rect;
 
-	vUI8 layer;
+	vUI8 layer; /* lower values are rendered below higher values */
 
 	vGRenderableBehavior behavior;
 } vGRenderable, *vPGRenderable;

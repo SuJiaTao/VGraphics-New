@@ -69,7 +69,8 @@ static vPCHAR vGShader_rectVert =
 	"void main()\n"
 	"{\n"
 	"\tf_colorMult = v_color;\n"
-	"\tf_textureUV = v_position;\n"
+	"\tvec4 tex4 = v_texture * vec4(v_position, 0.0, 1.0);\n"
+	"\tf_textureUV = tex4.xy;\n"
 	"\tgl_Position = v_projection * v_model * vec4(v_position, 0.0, 1.0);\t\t\n"
 	"}";
 
@@ -136,7 +137,7 @@ void vGShader_rectRender(vPGShader shader, vPTR unused,
 	/* lastly move rect around */
 	float fLayer = (float)(renderData->layer / 255.0f);
 	glTranslatef(renderData->transform.position.x, renderData->transform.position.y,
-		-1.0f + fLayer);
+		RECT_ZDEPTH + fLayer);
 	glRotatef(renderData->transform.rotation, 0.0f, 0.0f, 1.0f);
 	glScalef(renderData->transform.scale, renderData->transform.scale, 1.0f);
 
