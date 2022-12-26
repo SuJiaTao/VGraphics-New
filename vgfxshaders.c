@@ -26,6 +26,7 @@ static vPCHAR vGShader_errVert =
 
 static vPCHAR vGShader_errFrag =
 	"#version 460 core\n"
+	"out vec4 FragColor;"
 	"\n"
 	"void main()\n"
 	"{\n"
@@ -34,11 +35,11 @@ static vPCHAR vGShader_errFrag =
 	"\n"
 	"\tif (mod(x + y, 2.0) == 0.0)\n"
 	"\t{\n"
-	"\t\tgl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n"
+	"\t\FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n"
 	"\t}\n"
 	"\telse\n"
 	"\t{\n"
-	"\t\tgl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
+	"\t\FragColor = vec4(1.0, 0.0, 1.0, 1.0);\n"
 	"\t}\n"
 	"}";
 

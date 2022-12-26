@@ -339,7 +339,11 @@ void vGRT_initFunc(vPWorker worker, vPTR workerData,
 
 	/* make process DPI aware */
 	SetProcessDPIAware();
-	
+
+	/* set high self priority */
+	vBOOL threadPriorityBool =
+		SetThreadPriority(worker->thread, THREAD_PRIORITY_HIGHEST);
+
 	/* setup window class and register */
 	WNDCLASSA wClass;
 	vZeroMemory(&wClass, sizeof(WNDCLASSA));
