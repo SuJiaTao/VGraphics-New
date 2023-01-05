@@ -30,6 +30,11 @@ VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData)
 	/* png header is 8 bytes, skip the header	*/
 	vUI64 fileReadIndex = 8;
 
+	/* idat data */
+	vUI64  idatTotalBytes = 0;
+	vPBYTE idatConcatenated = NULL;
+	vUI64  idatWriteBytes = 0;
+
 	/* parse all chunks */
 	while (TRUE)
 	{
@@ -46,20 +51,51 @@ VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData)
 		fileReadIndex += 4;
 		vMemCopy(currentChunk->name, fileData + fileReadIndex, 4);
 
-		printf("found chunk %s with len %d\n", currentChunk->name, currentChunk->length);
+		/* if end, break loop */
+		if (strcmp(currentChunk->name, "IEND") == ZERO) break;
+
+		/* if idat, increment idatbytecounter */
+		if (strcmp(currentChunk->name, "IDAT") == ZERO) 
+			idatTotalBytes += currentChunk->length;
+
+		printf("read chunk %s with len %d\n", currentChunk->name, currentChunk->length);
+
+		/* goto chunk data and copy */
+		fileReadIndex += 4;
+		currentChunk->data = vAlloc(currentChunk->length);
+		if (currentChunk->length != 0)
+			vMemCopy(currentChunk->data, fileData + fileReadIndex, currentChunk->length);
 
 		/* jump all length */
-		fileReadIndex += currentChunk->length + 4ULL;
-
-		if (strcmp(currentChunk->name, "IEND") == ZERO) break;
+		fileReadIndex += currentChunk->length;
 
 		/* skip CRC */
 		fileReadIndex += 4;
 
-		printf("current fileindex: %x\n", fileReadIndex);
-
 		/* increment chunk count */
 		chunkCount++;
+	}
+
+	/* concatenate all idat chunks */
+	idatConcatenated = vAllocZeroed(idatTotalBytes);
+	
+	for (int i = 0; i < chunkCount; i++)
+	{
+		PGImageChunk currentChunk = chunks + i;
+
+		/* skip if not IDAT */
+		if (strcmp(currentChunk->name, "IDAT") != 0) continue;
+
+		/* concatenate */
+		vMemCopy(idatConcatenated + idatWriteBytes,
+			currentChunk->data, currentChunk->length);
+		idatWriteBytes += currentChunk->length;
+	}
+
+	/* free all chunk data */
+	for (int i = 0; i < chunkCount; i++)
+	{
+		vFree(chunks[i].data);
 	}
 
 	vFree(chunks);
