@@ -41,6 +41,8 @@
 
 #define LINELIST_NODE_SIZE	0x200
 
+#define PNG_PARSE_MAXCHUNKS	0x200
+
 #define ZNEAR_DEPTH			  0.0
 #define ZFAR_DEPTH			  100.0
 #define RECT_ZDEPTH			 -50.0
