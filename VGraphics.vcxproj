@@ -23,6 +23,7 @@
     <ClInclude Include="vgfxcore.h" />
     <ClInclude Include="vgfxdefs.h" />
     <ClInclude Include="vgfxlines.h" />
+    <ClInclude Include="vgfxpng.h" />
     <ClInclude Include="vgfxrenderable.h" />
     <ClInclude Include="vgfxshaders.h" />
     <ClInclude Include="vgfxthread.h" />
@@ -33,6 +34,7 @@
     <ClCompile Include="vgfxrenderable.c" />
     <ClCompile Include="vgfxshaders.c" />
     <ClCompile Include="vgfxthread.c" />
+    <ClCompile Include="vgfxpng.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

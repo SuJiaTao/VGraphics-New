@@ -239,6 +239,45 @@ VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
 	return skin;
 }
 
+static void GParseFileIDAT(vPBYTE iDATBlock, vPBYTE fileBlock)
+{
+	vUI64 fileBlockPointer = 8ULL;
+	vUI64 idatBlockPointer = 0ULL;
+
+	while (TRUE)
+	{
+		/* get chunk length */
+		vUI32 blockLength;
+		vMemCopy(&blockLength, fileBlock + fileBlockPointer, sizeof(blockLength));
+		blockLength = _byteswap_ulong(blockLength); /* swap endian */
+		printf("bl: %d\n", blockLength);
+
+		fileBlockPointer += 4ULL; /* move up 4 bytes */
+
+		/* get chunk type */
+		vCHAR blockName[5];	/* size 4 with null padding */
+		blockName[4] = 0;
+		vMemCopy(blockName, fileBlock + fileBlockPointer, 4);
+
+		fileBlockPointer += 4ULL; /* move up 4 bytes */
+
+		/* if end chunk, break */
+		if (strcmp(blockName, "IEND") == ZERO) break;
+
+		/* if data chunk, append to IDAT block */
+		if (strcmp(blockName, "IDAT") == ZERO)
+		{
+			vPBYTE imageData = fileBlock + (fileBlockPointer + 8LL);
+			vMemCopy(iDATBlock + idatBlockPointer, imageData, blockLength);
+			printf("wrote %d bytes to idatblock index %I64u from fileblock index %I64u\n",
+				blockLength, idatBlockPointer, fileBlockPointer + 8LL);
+		}
+
+		/* move to next chunk */
+		fileBlockPointer = fileBlockPointer + blockLength + 4;
+	}
+}
+
 VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, vBOOL wrap,
 	vPCHAR filePath)
 {
@@ -260,6 +299,7 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, v
 	/* load file into primary memory */
 	vUI64 fileSizeBytes = vFileSize(fileHndl);
 	vPBYTE fileBlock = vAllocZeroed(fileSizeBytes + 8);
+
 	vBOOL result = vFileRead(fileHndl, 0, fileSizeBytes, fileBlock);
 	if (result == FALSE)
 	{
@@ -267,22 +307,33 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, v
 		return NULL;
 	}
 
-	vUI32 readPointer = 8;	/* move past header */
+	vUI64 fileBlockReadPointer = 8ULL;	/* move past header */
+
+	/* create IDAT block */
+	vPBYTE idatBlock = vAllocZeroed(((vUI64)width * (vUI64)height * 4ULL) + width + height);
+
+	/* parse file IDAT and string it together */
+	GParseFileIDAT(idatBlock, fileBlock);
+
+	/* create parsed block */
+	vPBYTE parsedBlock = vAllocZeroed(((vUI64)width * (vUI64)height * 4ULL));
+
 	while (TRUE)
 	{
 		/* get chunk length */
 		vUI32 blockLength;
-		vMemCopy(&blockLength, fileBlock + readPointer, sizeof(blockLength));
+		vMemCopy(&blockLength, fileBlock + fileBlockReadPointer, sizeof(blockLength));
 		blockLength = _byteswap_ulong(blockLength); /* swap endian */
+		printf("bl: %d\n", blockLength);
 
-		readPointer += 4; /* move up 4 bytes */
+		fileBlockReadPointer += 4ULL; /* move up 4 bytes */
 
 		/* get chunk type */
 		vCHAR blockName[5];	/* size 4 with null padding */
 		blockName[4] = 0;
-		vMemCopy(blockName, fileBlock + readPointer, 4);
+		vMemCopy(blockName, fileBlock + fileBlockReadPointer, 4);
 
-		readPointer += 4; /* move up 4 bytes */
+		fileBlockReadPointer += 4ULL; /* move up 4 bytes */
 
 		/* if end chunk, break */
 		if (strcmp(blockName, "IEND") == ZERO) break;
@@ -290,8 +341,7 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, v
 		/* if data chunk, parse data to remove all filter bytes */
 		if (strcmp(blockName, "IDAT") == ZERO)
 		{
-			vPBYTE parsedBlock = vAllocZeroed((width * height * 4) + 8);
-			vPBYTE imageData = fileBlock + (readPointer + 8);
+			vPBYTE imageData = fileBlock + (fileBlockReadPointer + 8LL);
 			vUI64  imageByteIndex = 0;
 			for (int i = 0; i < height; i++)
 			{
@@ -322,7 +372,7 @@ VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, v
 		}
 
 		/* move to next chunk */
-		readPointer = readPointer + blockLength + 4;
+		fileBlockReadPointer = fileBlockReadPointer + blockLength + 4;
 	}
 
 	/* should not reach here */
