@@ -13,4 +13,4 @@
 
 
 /* ========== FUNCTIONS							==========	*/
-VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData);
+VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData, vUI32 width, vUI32 height);

@@ -21,7 +21,7 @@ typedef struct GImageChunk
 
 
 /* ========== FUNCTIONS							==========	*/
-VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData)
+VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData, vUI32 width, vUI32 height)
 {
 	/* generate all fillable chunks				*/
 	PGImageChunk chunks = vAllocZeroed(sizeof(GImageChunk) * PNG_PARSE_MAXCHUNKS);
@@ -34,6 +34,10 @@ VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData)
 	vUI64  idatTotalBytes = 0;
 	vPBYTE idatConcatenated = NULL;
 	vUI64  idatWriteBytes = 0;
+	vUI64  idatParseIndex = 0;
+
+	/* parsed image data */
+	vPBYTE imageDataParsed = vAllocZeroed(width * height * 4ULL);
 
 	/* parse all chunks */
 	while (TRUE)
@@ -63,6 +67,7 @@ VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData)
 		/* goto chunk data and copy */
 		fileReadIndex += 4;
 		currentChunk->data = vAlloc(currentChunk->length);
+		printf("copying data from %x to %x\n", fileReadIndex, fileReadIndex + currentChunk->length);
 		if (currentChunk->length != 0)
 			vMemCopy(currentChunk->data, fileData + fileReadIndex, currentChunk->length);
 
@@ -86,6 +91,9 @@ VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData)
 		/* skip if not IDAT */
 		if (strcmp(currentChunk->name, "IDAT") != 0) continue;
 
+		printf("concatenating idat %d with offset %d and len %d\n", i,
+			idatWriteBytes, currentChunk->length);
+
 		/* concatenate */
 		vMemCopy(idatConcatenated + idatWriteBytes,
 			currentChunk->data, currentChunk->length);
@@ -97,6 +105,26 @@ VGFXAPI vPBYTE vGParsePNGUncompressed(vPBYTE fileData)
 	{
 		vFree(chunks[i].data);
 	}
-
 	vFree(chunks);
+
+	/* parse idat chunk */
+	for (int i = 0; i < height; i++)
+	{
+		/* invert Y */
+		int heightActual = height - i - 1;
+
+		/* copy data */
+		vPBYTE parseBlockWritePtr = imageDataParsed + (heightActual * width * 4ULL);
+		vPBYTE imageDataReadPtr   = idatConcatenated + idatParseIndex;
+		vMemCopy(parseBlockWritePtr, imageDataReadPtr, width * 4ULL);
+
+		/* image byte index is incremented by the width + 1 to account for	*/
+		/* the extra filter byte. what a pain!								*/
+		idatParseIndex = idatParseIndex + (width * 4ULL) + 1;
+	}
+
+	/* free idat concatenated */
+	vFree(idatConcatenated);
+	
+	return imageDataParsed;
 }
