@@ -425,10 +425,14 @@ VGFXAPI vPosition vGWorldSpaceToScreen(vPosition worldPos)
 	return vCreatePosition(screenX, screenY);
 }
 
-/* ========== VCI FILE LOADING					==========	*/
+/* ========== VCI MANIPULATION					==========	*/
 VGFXAPI vPBYTE vGLoadVCI(vPCHAR path, vPUI32 width, vPUI32 height) {
 	/* test file exists */
-	if (vFileExists(path) == FALSE) return NULL;
+	if (vFileExists(path) == FALSE) {
+		vLogErrorFormatted(__func__,
+			"Could not load VCI file.");
+		return NULL;
+	}
 
 	/* open file */
 	vLogInfoFormatted(__func__, "Opening VCI file '%s'.", path);
@@ -438,6 +442,10 @@ VGFXAPI vPBYTE vGLoadVCI(vPCHAR path, vPUI32 width, vPUI32 height) {
 	/* load file header */
 	vGVCIFileHead fileHead;
 	vFileRead(vciFileHndl, 0, sizeof(fileHead), &fileHead);
+
+	/* set values */
+	*width  = fileHead.width;
+	*height = fileHead.height;
 
 	/* allocate required memory to copy compressed file */
 	vUI64 compressedDataSize = vFileSize(vciFileHndl) - sizeof(fileHead);
@@ -461,6 +469,7 @@ VGFXAPI vPBYTE vGLoadVCI(vPCHAR path, vPUI32 width, vPUI32 height) {
 	vPBYTE decompressedData = vAlloc(decompressedDataSize);
 	Decompress(decompObj, compressedData, compressedDataSize,
 		decompressedData, decompressedDataSize, &unused);
+	CloseDecompressor(decompObj);
 
 	vLogInfo(__func__, "Decompression completed!");
 
@@ -468,4 +477,40 @@ VGFXAPI vPBYTE vGLoadVCI(vPCHAR path, vPUI32 width, vPUI32 height) {
 	vFree(compressedData);
 
 	return decompressedData;
+}
+
+VGFXAPI void vGMakeVCI(vPCHAR path, vUI32 width, vUI32 height, vPBYTE bytes) {
+	/* make compresssed image buffer and create file */
+	HANDLE outFile = vFileCreate(path);
+	vPBYTE compressedData = vAlloc(width * height * 4);
+
+	/* compress image */
+	COMPRESSOR_HANDLE compObj;
+	SIZE_T compressedWriteSize;
+	CreateCompressor(VGFX_VCI_COMPRESSION, NULL, &compObj);
+	Compress(compObj, bytes, width * height * 4,
+		compressedData, width * height * 4, &compressedWriteSize);
+	CloseCompressor(compObj);
+
+	/* write to file */
+	vGVCIFileHead head;
+	head.width  = width;
+	head.height = height;
+	vFileWrite(outFile, 0, sizeof(head), &head);
+	vFileWrite(outFile, sizeof(head), compressedWriteSize, compressedData);
+
+	vFileClose(outFile);
+}
+
+VGFXAPI vPGSkin vGCreateSkinFromVCI(vPCHAR path, vBOOL wrap, vUI8 skins) {
+	vUI32 width, height;
+	PBYTE vciData = vGLoadVCI(path, &width, &height);
+
+	if (vciData == NULL)
+		return NULL;
+
+	vPGSkin skin =
+		vGCreateSkinFromBytes(width, height, skins, wrap, vciData);
+	vFree(vciData);
+	return skin;
 }
