@@ -6,6 +6,8 @@
 /* ========== INCLUDES							==========	*/
 #include <stdio.h>
 #include <math.h>
+#include <Windows.h>
+#include <compressapi.h>
 #include "vgfxcore.h"
 #include "vgfxthread.h"
 #include "vgfxrenderable.h"
@@ -239,102 +241,6 @@ VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount,
 	return skin;
 }
 
-VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, vBOOL wrap,
-	vPCHAR filePath)
-{
-	/* REQUIRES UNCOMPRESSED PNG, LATER CALLS vGCreateSkinFromBytes */
-
-	/* skin object */
-	vPGSkin skin = NULL;
-
-	vLogInfoFormatted(__func__, "Creating skin from file path: %s.", filePath);
-
-	/* get file handle */
-	HANDLE fileHndl = vFileOpen(filePath);
-	if (fileHndl == INVALID_HANDLE_VALUE)
-	{
-		vLogError(__func__, "Failed open file.");
-		return NULL;
-	}
-
-	/* load file into primary memory */
-	vUI64 fileSizeBytes = vFileSize(fileHndl);
-	vPBYTE fileBlock = vAllocZeroed(fileSizeBytes + 8);
-
-	vBOOL result = vFileRead(fileHndl, 0, fileSizeBytes, fileBlock);
-	if (result == FALSE)
-	{
-		vLogError(__func__, "Failed to read file.");
-		return NULL;
-	}
-
-	vUI64 fileBlockReadPointer = 8ULL;	/* move past header */
-
-	/* create parsed block */
-	vPBYTE parsedBlock = vAllocZeroed(((vUI64)width * (vUI64)height * 4ULL));
-
-	while (TRUE)
-	{
-		/* get chunk length */
-		vUI32 blockLength;
-		vMemCopy(&blockLength, fileBlock + fileBlockReadPointer, sizeof(blockLength));
-		blockLength = _byteswap_ulong(blockLength); /* swap endian */
-		printf("bl: %d\n", blockLength);
-
-		fileBlockReadPointer += 4ULL; /* move up 4 bytes */
-
-		/* get chunk type */
-		vCHAR blockName[5];	/* size 4 with null padding */
-		blockName[4] = 0;
-		vMemCopy(blockName, fileBlock + fileBlockReadPointer, 4);
-
-		fileBlockReadPointer += 4ULL; /* move up 4 bytes */
-
-		/* if end chunk, break */
-		if (strcmp(blockName, "IEND") == ZERO) break;
-
-		/* if data chunk, parse data to remove all filter bytes */
-		if (strcmp(blockName, "IDAT") == ZERO)
-		{
-			vPBYTE imageData = fileBlock + (fileBlockReadPointer + 8LL);
-			vUI64  imageByteIndex = 0;
-			for (int i = 0; i < height; i++)
-			{
-				/* invert Y */
-				int heightActual = height - i - 1;
-
-				/* copy data */
-				vPBYTE parseBlockWritePtr = parsedBlock + (heightActual * width * 4);
-				vPBYTE imageDataReadPtr = imageData + imageByteIndex;
-				vMemCopy(parseBlockWritePtr, imageDataReadPtr, width * 4);
-
-				/* image byte index is incremented by the width + 1 to account for	*/
-				/* the extra filter byte. what a pain!								*/
-				imageByteIndex = imageByteIndex + (width * 4) + 1;
-			}
-
-			/* create texture using parsed block */
-			skin = vGCreateSkinFromBytes(width, height, skinCount, wrap,
-				parsedBlock);
-
-			/* end function */
-			vFree(parsedBlock);
-			vFree(fileBlock);
-			vFileClose(fileHndl);
-
-			vLogInfoFormatted(__func__, "Skin created from PNG!");
-			return skin;
-		}
-
-		/* move to next chunk */
-		fileBlockReadPointer = fileBlockReadPointer + blockLength + 4;
-	}
-
-	/* should not reach here */
-	vLogErrorFormatted(__func__, "Parsed PNG without finding image data.");
-	return NULL;
-}
-
 VGFXAPI void vGDestroySkin(vPGSkin skin)
 {
 	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
@@ -517,4 +423,49 @@ VGFXAPI vPosition vGWorldSpaceToScreen(vPosition worldPos)
 	screenY = (screenY + 1.0f) * (windowHeight * 0.5f);
 
 	return vCreatePosition(screenX, screenY);
+}
+
+/* ========== VCI FILE LOADING					==========	*/
+VGFXAPI vPBYTE vGLoadVCI(vPCHAR path, vPUI32 width, vPUI32 height) {
+	/* test file exists */
+	if (vFileExists(path) == FALSE) return NULL;
+
+	/* open file */
+	vLogInfoFormatted(__func__, "Opening VCI file '%s'.", path);
+	HANDLE vciFileHndl = vFileOpen(path);
+	vLogInfo(__func__, "Opened VCI file.");
+
+	/* load file header */
+	vGVCIFileHead fileHead;
+	vFileRead(vciFileHndl, 0, sizeof(fileHead), &fileHead);
+
+	/* allocate required memory to copy compressed file */
+	vUI64 compressedDataSize = vFileSize(vciFileHndl) - sizeof(fileHead);
+	vPBYTE compressedData = vAlloc(compressedDataSize);
+
+	/* load compressed data */
+	vFileRead(vciFileHndl, sizeof(fileHead), compressedDataSize, compressedData);
+
+	/* close file */
+	vFileClose(vciFileHndl);
+
+	vLogInfo(__func__, "Decompressing VCI file...");
+
+	/* create decompressor */
+	DECOMPRESSOR_HANDLE decompObj;
+	CreateDecompressor(VGFX_VCI_COMPRESSION, NULL, &decompObj);
+
+	/* decompress into decompression buffer */
+	SIZE_T unused;
+	vUI64 decompressedDataSize = fileHead.width * fileHead.height * 4;
+	vPBYTE decompressedData = vAlloc(decompressedDataSize);
+	Decompress(decompObj, compressedData, compressedDataSize,
+		decompressedData, decompressedDataSize, &unused);
+
+	vLogInfo(__func__, "Decompression completed!");
+
+	/* free compressed data and return */
+	vFree(compressedData);
+
+	return decompressedData;
 }

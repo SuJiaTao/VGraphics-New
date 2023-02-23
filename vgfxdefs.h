@@ -9,6 +9,8 @@
 /* ========== INCLUDES							==========	*/
 #include "vgfx.h"
 #include <gl/GL.h>
+#include <minwinbase.h>
+#include <compressapi.h>
 
 
 /* ========== API DEFINITION					==========	*/
@@ -47,6 +49,8 @@
 #define ZFAR_DEPTH			  100.0
 #define RECT_ZDEPTH			 -50.0
 #define LINE_ZDEPTH			 -10.0
+
+#define VGFX_VCI_COMPRESSION COMPRESS_ALGORITHM_XPRESS_HUFF
 
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
@@ -156,6 +160,13 @@ typedef struct vGLine
 	vGColor   col;
 	float     width;
 } vGLine, *vPGLine;
+
+
+/* ========== VCI HEADER						==========	*/
+typedef struct vGVCIFileHead {
+	vUI32 width;
+	vUI32 height;
+} vGVCIFileHead, *vPGVCIFileHead;
 
 
 /* ========== WINDOW STATE						==========	*/

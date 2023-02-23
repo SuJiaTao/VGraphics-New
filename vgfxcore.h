@@ -33,8 +33,6 @@ VGFXAPI vPGShader vGCreateShader(vPFGSHADERINIT initFunc, vPFGSHADERRENDER rende
 VGFXAPI void vGDestroyShader(vPGShader shader);
 VGFXAPI vPGSkin vGCreateSkinFromBytes(vUI16 width, vUI16 height, vUI8 skinCount, vBOOL wrap,
 	vPBYTE bytes);
-VGFXAPI vPGSkin vGCreateSkinFromPNG(vUI16 width, vUI16 height, vUI8 skinCount, vBOOL wrap,
-	vPCHAR fileName);
 VGFXAPI void vGDestroySkin(vPGSkin skin);
 VGFXAPI vGRect vGCreateRect(float left, float right, float bottom, float top);
 VGFXAPI vGRect vGCreateRectCentered(float widht, float height);
@@ -68,5 +66,8 @@ VGFXAPI vPosition vGScreenSpaceMousePos(void);
 VGFXAPI vPosition vGScreenSpaceToWorld(vPosition screenPos);
 VGFXAPI vPosition vGWorldSpaceMousePosition(void);
 VGFXAPI vPosition vGWorldSpaceToScreen(vPosition worldPos);
+
+/* ========== VCI FILE LOADING					==========	*/
+VGFXAPI vPBYTE vGLoadVCI(vPCHAR path, vPUI32 width, vPUI32 height);
 
 #endif

@@ -48,9 +48,6 @@
     <ClInclude Include="vgfxlines.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="vgfxpng.h">
-      <Filter>Header Files\Internal</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vgfxcore.c">
@@ -67,9 +64,6 @@
     </ClCompile>
     <ClCompile Include="vgfxlines.c">
       <Filter>Resource Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="vgfxpng.c">
-      <Filter>Resource Files\Internal</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

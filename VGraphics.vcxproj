@@ -23,7 +23,6 @@
     <ClInclude Include="vgfxcore.h" />
     <ClInclude Include="vgfxdefs.h" />
     <ClInclude Include="vgfxlines.h" />
-    <ClInclude Include="vgfxpng.h" />
     <ClInclude Include="vgfxrenderable.h" />
     <ClInclude Include="vgfxshaders.h" />
     <ClInclude Include="vgfxthread.h" />
@@ -34,7 +33,6 @@
     <ClCompile Include="vgfxrenderable.c" />
     <ClCompile Include="vgfxshaders.c" />
     <ClCompile Include="vgfxthread.c" />
-    <ClCompile Include="vgfxpng.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -172,7 +170,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>C:\Bailey\Programming\Resources\glew-2.1.0\lib\Release\x64;C:\Bailey\Programming\VCore\VCore\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>VCore.lib;glew32s.lib;openGL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>VCore.lib;glew32s.lib;openGL32.lib;cabinet.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
