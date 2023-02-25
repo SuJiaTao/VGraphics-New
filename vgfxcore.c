@@ -94,6 +94,59 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData)
 	vDumpEntryBuffer();
 }
 
+VGFXAPI void  vGSetWindowResizable(vBOOL state) {
+	/* generate new window flags */
+	DWORD winStyle = GetWindowLongA(
+		_vgfx.window.window,
+		GWL_STYLE
+	);
+
+	if (state) {
+		winStyle |= WS_THICKFRAME;
+	}
+	else
+	{
+		winStyle &= ~WS_THICKFRAME;
+	}
+
+	SetWindowLongA(
+		_vgfx.window.window,
+		GWL_STYLE,
+		winStyle
+	);
+}
+
+VGFXAPI void  vGSetWindowMaximizeable(vBOOL state) {
+	/* generate new window flags */
+	DWORD winStyle = GetWindowLongA(
+		_vgfx.window.window,
+		GWL_STYLE
+	);
+
+	if (state) {
+		winStyle |= WS_MAXIMIZEBOX;
+	}
+	else
+	{
+		winStyle &= ~WS_MAXIMIZEBOX;
+	}
+
+	SetWindowLongA(
+		_vgfx.window.window,
+		GWL_STYLE,
+		winStyle
+	);
+}
+
+VGFXAPI void  vGSetWindowSize(vUI32 width, vUI32 height) {
+	SetWindowPos(
+		_vgfx.window.window, NULL,
+		ZERO, ZERO,
+		width, height,
+		SWP_NOMOVE
+	);
+}
+
 VGFXAPI vGRect vGCreateRect(float left, float right, float bottom, float top)
 {
 	vGRect rect;
@@ -338,7 +391,6 @@ VGFXAPI void vGExit(void)
 	/* ONLY THREADS OWNING A WINDOW CAN DESTROY THE WINDOW			*/
 	vTIME syncTick =
 		vWorkerDispatchTask(_vgfx.workerThread, vGRT_destroyWindowTask, NULL);
-	vWorkerWaitCycleCompletion(_vgfx.workerThread, syncTick, WORKER_WAITTIME_MAX);
 }
 
 VGFXAPI vBOOL vGExited(void)

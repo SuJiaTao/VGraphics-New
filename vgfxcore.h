@@ -10,8 +10,11 @@
 #include "vgfx.h"
 
 
-/* ========== INITIALIZATION					==========	*/
+/* ========== INITIALIZATION AND WINDOW			==========	*/
 VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData);
+VGFXAPI void  vGSetWindowResizable(vBOOL state);
+VGFXAPI void  vGSetWindowMaximizeable(vBOOL state);
+VGFXAPI void  vGSetWindowSize(vUI32 width, vUI32 height);
 
 
 /* ========== SYNCHRONIZATION					==========	*/
@@ -19,6 +22,7 @@ VGFXAPI void vGLock(void);
 VGFXAPI void vGUnlock(void);
 VGFXAPI void vGSync(void);
 VGFXAPI void vGSyncWaitForFrames(vUI64 frameCount);
+
 
 /* ========== RENDERABLE ATTACHMENT				==========	*/
 VGFXAPI vPGRenderable vGCreateRenderable(vPObject object, vTransform transform,
