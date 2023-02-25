@@ -126,6 +126,15 @@ VGFXAPI void vGUnlock(void)
 	LeaveCriticalSection(&_vgfx.lock);
 }
 
+VGFXAPI void vGSync(void) {
+	vGSyncWaitForFrames(ZERO);
+}
+
+VGFXAPI void vGSyncWaitForFrames(vUI64 frameCount) {
+	vWorkerWaitCycleCompletion(_vgfx.workerThread,
+		vWorkerGetCycle(_vgfx.workerThread) + frameCount,
+		WORKER_WAITTIME_MAX);
+}
 
 /* ========== RENDERABLE ATTACHMENT				==========	*/
 VGFXAPI vPGRenderable vGCreateRenderable(vPObject object, vTransform transform,
@@ -324,7 +333,7 @@ VGFXAPI void vGAttatchExitCallback(vPFGEXITCALLBACK exitFunc)
 }
 
 VGFXAPI void vGExit(void)
-{
+{ 
 	/* THIS FUNCTION MUST BE DISPATCHED TO RENDER THREAD AS A TASK	*/
 	/* ONLY THREADS OWNING A WINDOW CAN DESTROY THE WINDOW			*/
 	vTIME syncTick =
@@ -335,6 +344,17 @@ VGFXAPI void vGExit(void)
 VGFXAPI vBOOL vGExited(void)
 {
 	return vWorkerIsAlive(_vgfx.workerThread) == FALSE;
+}
+
+VGFXAPI vBOOL vGShouldExit(void) {
+	vGLock();
+	vBOOL val = _vgfx.shouldExit;
+	vGUnlock();
+	return val;
+}
+
+VGFXAPI void  vGSetShouldExit(vBOOL value) {
+	_vgfx.shouldExit = value;
 }
 
 

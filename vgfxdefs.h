@@ -51,6 +51,7 @@
 #define LINE_ZDEPTH			 -10.0
 
 #define VGFX_VCI_COMPRESSION COMPRESS_ALGORITHM_XPRESS_HUFF
+#define VGFX_EXIT_SIGNAL (WM_USER + 0x10)
 
 /* ========== COLOR VALUES						==========	*/
 #define VGFX_COLOR_0b  54,  90,  92
@@ -223,6 +224,7 @@ typedef struct _vGInternals
 	vPWorker workerThread;		/* graphics thread		*/
 	vUI32    targetFrameRate;
 	vGWindow window;			/* render window		*/
+	BOOL	 shouldExit;	/* whether window has recieved close signal */
 
 	vUI16 renderableHandle;
 

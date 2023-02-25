@@ -17,7 +17,8 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData);
 /* ========== SYNCHRONIZATION					==========	*/
 VGFXAPI void vGLock(void);
 VGFXAPI void vGUnlock(void);
-
+VGFXAPI void vGSync(void);
+VGFXAPI void vGSyncWaitForFrames(vUI64 frameCount);
 
 /* ========== RENDERABLE ATTACHMENT				==========	*/
 VGFXAPI vPGRenderable vGCreateRenderable(vPObject object, vTransform transform,
@@ -55,6 +56,8 @@ VGFXAPI vPGDefaultShaderData vGGetDefaultShaderData(void);
 VGFXAPI void vGAttatchExitCallback(vPFGEXITCALLBACK exitFunc);
 VGFXAPI void vGExit(void);
 VGFXAPI vBOOL vGExited(void);
+VGFXAPI vBOOL vGShouldExit(void);
+VGFXAPI void  vGSetShouldExit(vBOOL value);
 
 
 /* ========== INTERNALS							==========	*/

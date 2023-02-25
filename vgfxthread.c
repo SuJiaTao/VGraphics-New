@@ -271,7 +271,16 @@ static LRESULT CALLBACK vGWindowProc(HWND window, UINT message,
 
 		break;
 
-	/* CLOSE CALLBACK */
+	case WM_CLOSE:
+
+		/* ignore close and leave it up to the user */
+		vGLock();
+		_vgfx.shouldExit = TRUE;
+		vGUnlock();
+		return TRUE;
+
+	/* FINAL EXIT CALLBACK */
+	case VGFX_EXIT_SIGNAL:
 	case WM_DESTROY:
 
 		/* run destruction callbacks */
@@ -521,11 +530,6 @@ void vGRT_destroySkinTask(vPWorker worker, vPTR workerData, vPGSkin input)
 
 void vGRT_destroyWindowTask(vPWorker worker, vPTR workerData, vPTR unused)
 {
-	BOOL destroyResult = DestroyWindow(_vgfx.window.window);
-	if (destroyResult == FALSE)
-	{
-		vLogErrorFormatted(__func__, "Failed to destroy window with error code [%d].",
-			GetLastError());
-		vCoreFatalError(__func__, "Window destruction failed");
-	}
+	BOOL destroyResult = SendMessageA(_vgfx.window.window,
+		VGFX_EXIT_SIGNAL, NULL, NULL);
 }
