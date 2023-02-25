@@ -499,6 +499,8 @@ VGFXAPI void vGMakeVCI(vPCHAR path, vUI32 width, vUI32 height, vPBYTE bytes) {
 	vFileWrite(outFile, 0, sizeof(head), &head);
 	vFileWrite(outFile, sizeof(head), compressedWriteSize, compressedData);
 
+	vFree(compressedData);
+
 	vFileClose(outFile);
 }
 
