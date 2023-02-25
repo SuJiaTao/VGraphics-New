@@ -147,6 +147,32 @@ VGFXAPI void  vGSetWindowSize(vUI32 width, vUI32 height) {
 	);
 }
 
+VGFXAPI void  vGGetWindowSize(vPUI32 width, vPUI32 height) {
+	RECT wRect;
+	GetWindowRect(_vgfx.window.window, &wRect);
+	*width = (vUI32)(wRect.right - wRect.left);
+	*height = (vUI32)(wRect.bottom - wRect.top);
+}
+
+VGFXAPI float vGGetWindowAspect(void) {
+	vUI32 w, h;
+	vGGetWindowSize(&w, &h);
+	return (float)w / (float)h;
+}
+
+VGFXAPI void  vGGetWindowClientSize(vPUI32 width, vPUI32 height) {
+	RECT cRect;
+	GetClientRect(_vgfx.window.window, &cRect);
+	*width = (vUI32)(cRect.right - cRect.left);
+	*height = (vUI32)(cRect.bottom - cRect.top);
+}
+
+VGFXAPI float vGGetWindowClientAspect(void) {
+	vUI32 w, h;
+	vGGetWindowClientSize(&w, &h);
+	return (float)w / (float)h;
+}
+
 VGFXAPI vGRect vGCreateRect(float left, float right, float bottom, float top)
 {
 	vGRect rect;

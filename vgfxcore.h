@@ -15,6 +15,10 @@ VGFXAPI vBOOL vGInitialize(vPGInitializeData initializationData);
 VGFXAPI void  vGSetWindowResizable(vBOOL state);
 VGFXAPI void  vGSetWindowMaximizeable(vBOOL state);
 VGFXAPI void  vGSetWindowSize(vUI32 width, vUI32 height);
+VGFXAPI void  vGGetWindowSize(vPUI32 width, vPUI32 height);
+VGFXAPI float vGGetWindowAspect(void);
+VGFXAPI void  vGGetWindowClientSize(vPUI32 width, vPUI32 height);
+VGFXAPI float vGGetWindowClientAspect(void);
 
 
 /* ========== SYNCHRONIZATION					==========	*/
